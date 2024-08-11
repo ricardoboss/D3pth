@@ -94,15 +94,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
     private static Vector2 ProjectPoint(Vector3 point)
     {
-        // const float perspective = 200;
-        // const float projectionCenterX = 128; // width / 2
-        // const float projectionCenterY = 128; // height / 2
-        //
-        // var scaleProjected = perspective / (point.Z + perspective);
-        // var x = point.X * scaleProjected + projectionCenterX;
-        // var y = point.Y * scaleProjected + projectionCenterY;
-
-        var scale = 1000 / (point.Z + 1000);
+        const float perspective = 1000;
+        var scale = perspective / (point.Z + perspective);
 
         var x = point.X * scale;
         var y = point.Y * scale;
