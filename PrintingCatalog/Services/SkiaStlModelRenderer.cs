@@ -51,25 +51,6 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             };
 
             canvas.DrawPath(path, paint);
-
-            // using (new SKAutoCanvasRestore(canvas, true))
-            // {
-            //     view.Save();
-            //
-            //     // move view to look in the direction of the normal
-            //     view.RotateZDegrees(MathF.Atan2(normal.Z, normal.X) * 180 / MathF.PI);
-            //     view.RotateYDegrees(MathF.Atan2(normal.Y, normal.X) * 180 / MathF.PI);
-            //     view.RotateXDegrees(MathF.Atan2(normal.X, normal.Y) * 180 / MathF.PI);
-            //
-            //     // move view to look at the triangle
-            //     view.Translate(center.X, center.Y, center.Z);
-            //
-            //     view.ApplyToCanvas(canvas);
-            //     view.Restore();
-            //
-            //     // draw the triangle
-            //     canvas.DrawPath(face, paint);
-            // }
         }
     }
 
