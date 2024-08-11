@@ -16,12 +16,11 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
         using var canvas = surface!.Canvas;
 
-        canvas!.Clear(SKColors.White);
+        canvas!.Clear(SKColors.Transparent);
 
         // center the canvas
         canvas.Translate(imageWidth / 2f, imageHeight / 2f);
 
-        // RenderCube(canvas, view);
         await RenderTrianglesAsync(canvas, stlModel.Triangles);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
@@ -82,65 +81,5 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var y = point.Y * scale;
 
         return new(x, y);
-    }
-
-    private static void RenderCube(SKCanvas canvas, SK3dView view)
-    {
-        // define the cube face
-        var face = SKRect.Create(0, 0, 100, 100);
-
-        // draw the left face
-        using (new SKAutoCanvasRestore(canvas, true))
-        {
-            // get the face in the correct location
-            view.Save();
-            view.RotateYDegrees(-90);
-            view.ApplyToCanvas(canvas);
-            view.Restore();
-
-            // draw the face
-            var leftFace = new SKPaint
-            {
-                Color = SKColors.LightGray,
-                IsAntialias = true,
-            };
-            canvas.DrawRect(face, leftFace);
-        }
-
-        // draw the right face
-        using (new SKAutoCanvasRestore(canvas, true))
-        {
-            // get the face in the correct location
-            view.Save();
-            view.TranslateZ(-100);
-            view.ApplyToCanvas(canvas);
-            view.Restore();
-
-            // draw the face
-            var rightFace = new SKPaint
-            {
-                Color = SKColors.Gray,
-                IsAntialias = true,
-            };
-            canvas.DrawRect(face, rightFace);
-        }
-
-        // draw the top face
-        using (new SKAutoCanvasRestore(canvas, true))
-        {
-            // get the face in the correct location
-            view.Save();
-            view.RotateXDegrees(90);
-            view.ApplyToCanvas(canvas);
-            view.Restore();
-
-            // draw the face
-            var topFace = new SKPaint
-            {
-                Color = SKColors.DarkGray,
-                IsAntialias = true,
-            };
-            canvas.DrawRect(face, topFace);
-        }
     }
 }

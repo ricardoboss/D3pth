@@ -4,32 +4,35 @@ using Spectre.Console.Cli;
 
 namespace PrintingCatalog.Commands;
 
-internal sealed class LoadFile(IStlModelLoader stlModelLoader, IStlModelRenderer stlModelRenderer) : AsyncCommand<LoadFile.Settings>
+internal sealed class RenderCommand(
+    IFileDiscoverer fileDiscoverer,
+    IStlModelLoader stlModelLoader,
+    IStlModelRenderer stlModelRenderer
+) : AsyncCommand<RenderCommand.Settings>
 {
     public sealed class Settings : CommandSettings
     {
-        [CommandArgument(0, "<file>")] public required string File { get; init; }
-
-        [CommandOption("-r|--renderer")]
-        public bool Render { get; init; }
+        [CommandArgument(0, "[file]")] public string? File { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var file = new FileInfo(settings.File);
-        if (!file.Exists)
-        {
-            AnsiConsole.MarkupLine($"[red]File '[bold]{file.Name}[/]' does not exist");
+        var files = settings.File is null
+            ? fileDiscoverer.DiscoverAsync(Directory.GetCurrentDirectory(), extensions: "stl")
+            : new List<FileInfo> { new(settings.File) }.ToAsyncEnumerable();
 
-            return 1;
-        }
+        await foreach (var file in files)
+            await RenderFile(file);
 
+        return 0;
+    }
+
+    private async Task RenderFile(FileInfo file)
+    {
         var model = await stlModelLoader.LoadAsync(file);
 
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
-
-        if (!settings.Render) return 0;
 
         var image = await stlModelRenderer.RenderToPngAsync(model);
         var imageFile = new FileInfo($"{model.Metadata.Name}.png");
@@ -37,7 +40,5 @@ internal sealed class LoadFile(IStlModelLoader stlModelLoader, IStlModelRenderer
         await stream.WriteAsync(image);
 
         AnsiConsole.MarkupLine($"[green]Rendered to '[bold]{imageFile.Name}[/]'[/]");
-
-        return 0;
     }
 }

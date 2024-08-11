@@ -29,5 +29,5 @@ static void ConfigureApp(IConfigurator app)
 {
     app.SetApplicationName("PrintingCatalog");
     app.AddCommand<GenerateCommand>("generate");
-    app.AddCommand<LoadFile>("load");
+    app.AddCommand<RenderCommand>("render");
 }
