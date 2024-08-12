@@ -41,7 +41,7 @@ internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncComman
             await document.ShowInPreviewerAsync();
         }
         else if (settings.OutputFile is { } outFile)
-            await StoreOnDiskAsync(catalog, outFile);
+            await StoreOnDiskAsync(catalog, new(outFile));
         else
             throw new ArgumentException("Either --preview or --output must be specified");
 
@@ -50,12 +50,23 @@ internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncComman
         return 0;
     }
 
-    private static async Task StoreOnDiskAsync(ICatalog catalog, string path)
+    private static async Task StoreOnDiskAsync(ICatalog catalog, FileInfo outputFile)
     {
-        AnsiConsole.MarkupLine($"[green]Saving to '[bold]{path}[/]'[/]");
+        AnsiConsole.MarkupLine($"[green]Generating PDF...[/]");
 
-        await using var stream = File.OpenWrite(path);
+        var stopwatch = Stopwatch.StartNew();
+        var pdf = catalog.GeneratePdf();
+        stopwatch.Stop();
 
-        await stream.WriteAsync(catalog.GeneratePdf());
+        AnsiConsole.MarkupLine($"[green]Generated PDF in [bold]{stopwatch.Elapsed}[/][/]");
+
+        AnsiConsole.MarkupLine($"[green]Saving to '[bold]{outputFile.FullName}[/]'...[/]");
+
+        if (outputFile.Exists)
+            outputFile.Delete();
+
+        await using var stream = outputFile.OpenWrite();
+
+        await stream.WriteAsync(pdf);
     }
 }

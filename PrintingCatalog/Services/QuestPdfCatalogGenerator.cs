@@ -16,8 +16,9 @@ internal sealed class QuestPdfCatalogGenerator(
         QuestPDF.Settings.License = LicenseType.Community;
 
         var models = await LoadModelsAsync(sourceFolder, cancellationToken).ToListAsync(cancellationToken);
+        var sourceDir = new DirectoryInfo(sourceFolder);
 
-        return new Catalog(models, stlModelRenderer);
+        return new Catalog(models, stlModelRenderer, sourceDir);
     }
 
     private async IAsyncEnumerable<IStlModel> LoadModelsAsync(string sourceFolder,

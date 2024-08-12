@@ -14,6 +14,7 @@ public class StlModelLoader : IStlModelLoader
 
         return new StlModel
         {
+            File = file,
             Metadata = metadata,
             Triangles = triangles,
         };
