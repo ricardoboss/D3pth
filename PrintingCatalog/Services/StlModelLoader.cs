@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Text.Json;
 using PrintingCatalog.Interfaces;
 using PrintingCatalog.Models;
@@ -60,9 +61,10 @@ public class StlModelLoader : IStlModelLoader
             if (cancellationToken.IsCancellationRequested)
                 break;
 
-            var normalX = reader.ReadSingle();
-            var normalY = reader.ReadSingle();
-            var normalZ = reader.ReadSingle();
+            // skip normal
+            _ = reader.ReadSingle();
+            _ = reader.ReadSingle();
+            _ = reader.ReadSingle();
 
             var aX = reader.ReadSingle();
             var aY = reader.ReadSingle();
@@ -78,11 +80,15 @@ public class StlModelLoader : IStlModelLoader
 
             var attributeByteCount = reader.ReadUInt16();
 
+            var a = new Vector3(aX, aY, aZ);
+            var b = new Vector3(bX, bY, bZ);
+            var c = new Vector3(cX, cY, cZ);
+
             var triangle = new Triangle(
-                Normal: new(normalX, normalY, normalZ),
-                A: new(aX, aY, aZ),
-                B: new(bX, bY, bZ),
-                C: new(cX, cY, cZ),
+                Normal: CalculateNormal(a, b, c),
+                A: a,
+                B: b,
+                C: c,
                 AttributeByteCount: attributeByteCount
             );
 
@@ -90,5 +96,20 @@ public class StlModelLoader : IStlModelLoader
         }
 
         return triangles;
+    }
+
+    private static Vector3 CalculateNormal(Vector3 v1, Vector3 v2, Vector3 v3)
+    {
+        // Calculate the edge vectors
+        var edge1 = v2 - v1;
+        var edge2 = v3 - v1;
+
+        // Compute the cross product using the right-hand rule
+        var normal = Vector3.Cross(edge1, edge2);
+
+        // Normalize the normal vector to ensure it's a unit vector
+        normal = Vector3.Normalize(normal);
+
+        return normal;
     }
 }
