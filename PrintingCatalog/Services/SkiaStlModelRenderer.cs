@@ -10,8 +10,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 {
     public async Task<byte[]> RenderToPngAsync(IStlModel stlModel, CancellationToken cancellationToken = default)
     {
-        const int imageWidth = 512;
-        const int imageHeight = 512;
+        const int imageWidth = 1024;
+        const int imageHeight = 1024;
 
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
 
@@ -35,12 +35,17 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, nearPlane, farPlane);
 
         var modelMatrix = Matrix4x4.CreateScale(1.5f) *
-                          Matrix4x4.CreateTranslation(0f, 0f, 0f) *
                           Matrix4x4.CreateRotationZ(MathF.PI);
 
         // var viewProjectionMatrix = projectionMatrix * viewMatrix;
         // var modelViewProjectionMatrix = viewProjectionMatrix * modelMatrix;
         var modelViewProjectionMatrix = projectionMatrix * modelMatrix;
+
+        var modelColor = SKColors.Gray;
+        if (stlModel.Metadata.Color is { } color)
+        {
+            modelColor = SKColor.Parse(color);
+        }
 
         DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
@@ -49,9 +54,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         foreach (var (normal, a, b, c, _) in projected)
         {
-            DrawTriangleShaded(canvas, imageWidth, imageHeight, normal, a, b, c, SKColors.Yellow, lightPosition,
+            DrawTriangleShaded(canvas, imageWidth, imageHeight, normal, a, b, c, modelColor, lightPosition,
                 lightColor, ambientIntensity, diffuseIntensity);
-            // DrawTriangle(canvas, imageWidth, imageHeight, a, b, c, SKColors.Yellow.WithAlpha(30));
         }
 
         // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
@@ -98,7 +102,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const int gridSize = 100;
         const int gridStep = 10;
 
-        var color = SKColors.Gray.WithAlpha(30);
+        using var paint = new SKPaint();
+        paint.Color = SKColors.Gray.WithAlpha(30);
 
         for (var x = -gridSize; x <= gridSize; x += gridStep)
         {
@@ -108,7 +113,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var aTransformed = TransformPoint(a, viewMatrix, viewProjectionMatrix);
             var bTransformed = TransformPoint(b, viewMatrix, viewProjectionMatrix);
 
-            DrawLine(canvas, width, height, aTransformed, bTransformed, color);
+            DrawLine(canvas, width, height, aTransformed, bTransformed, paint);
         }
 
         for (var z = -gridSize; z <= gridSize; z += gridStep)
@@ -119,7 +124,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var aTransformed = TransformPoint(a, viewMatrix, viewProjectionMatrix);
             var bTransformed = TransformPoint(b, viewMatrix, viewProjectionMatrix);
 
-            DrawLine(canvas, width, height, aTransformed, bTransformed, color);
+            DrawLine(canvas, width, height, aTransformed, bTransformed, paint);
         }
     }
 
@@ -131,14 +136,23 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var yAxis = new Vector3(0, 100, 0);
         var zAxis = new Vector3(0, 0, 100);
 
+        using var xAxisPaint = new SKPaint();
+        xAxisPaint.Color = SKColors.Red;
+
+        using var yAxisPaint = new SKPaint();
+        yAxisPaint.Color = SKColors.Blue;
+
+        using var zAxisPaint = new SKPaint();
+        zAxisPaint.Color = SKColors.Green;
+
         var originTransformed = TransformPoint(origin, viewMatrix, viewProjectionMatrix);
         var xAxisTransformed = TransformPoint(xAxis, viewMatrix, viewProjectionMatrix);
         var yAxisTransformed = TransformPoint(yAxis, viewMatrix, viewProjectionMatrix);
         var zAxisTransformed = TransformPoint(zAxis, viewMatrix, viewProjectionMatrix);
 
-        DrawLine(canvas, width, height, originTransformed, xAxisTransformed, SKColors.Red);
-        DrawLine(canvas, width, height, originTransformed, yAxisTransformed, SKColors.Blue);
-        DrawLine(canvas, width, height, originTransformed, zAxisTransformed, SKColors.Green);
+        DrawLine(canvas, width, height, originTransformed, xAxisTransformed, xAxisPaint);
+        DrawLine(canvas, width, height, originTransformed, yAxisTransformed, yAxisPaint);
+        DrawLine(canvas, width, height, originTransformed, zAxisTransformed, zAxisPaint);
     }
 
     private static Vector3 TransformPoint(Vector3 point, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
@@ -178,7 +192,10 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var shadingColor = CalculateShading(normal, lightPos, lightColor, center, modelColor, ambientIntensity,
             diffuseIntensity);
 
-        DrawTriangle(canvas, width, height, a, b, c, shadingColor);
+        using var paint = new SKPaint();
+        paint.Color = shadingColor;
+
+        DrawTriangle(canvas, width, height, a, b, c, paint);
     }
 
     private static void DrawTriangle(
@@ -188,16 +205,13 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         Vector3 a,
         Vector3 b,
         Vector3 c,
-        SKColor color
+        SKPaint paint
     )
     {
         // Convert to screen space (e.g., from -1..1 to canvas size)
         var p1 = new SKPoint((a.X + 1) * width / 2, (a.Y + 1) * height / 2);
         var p2 = new SKPoint((b.X + 1) * width / 2, (b.Y + 1) * height / 2);
         var p3 = new SKPoint((c.X + 1) * width / 2, (c.Y + 1) * height / 2);
-
-        using var paint = new SKPaint();
-        paint.Color = color;
 
         // Draw the triangle
         using var path = new SKPath();
@@ -209,14 +223,11 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         canvas.DrawPath(path, paint);
     }
 
-    private static void DrawLine(SKCanvas canvas, int width, int height, Vector3 a, Vector3 b, SKColor color)
+    private static void DrawLine(SKCanvas canvas, int width, int height, Vector3 a, Vector3 b, SKPaint paint)
     {
         // Convert to screen space (e.g., from -1..1 to canvas size)
         var p1 = new SKPoint((a.X + 1) * width / 2, (a.Y + 1) * height / 2);
         var p2 = new SKPoint((b.X + 1) * width / 2, (b.Y + 1) * height / 2);
-
-        using var paint = new SKPaint();
-        paint.Color = color;
 
         // Draw the line
         canvas.DrawLine(p1, p2, paint);

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using PrintingCatalog.Interfaces;
 using PrintingCatalog.Models;
 
@@ -6,6 +7,38 @@ namespace PrintingCatalog.Services;
 public class StlModelLoader : IStlModelLoader
 {
     public async Task<IStlModel> LoadAsync(FileInfo file, CancellationToken cancellationToken = default)
+    {
+        var triangles = await ReadTriangles(file, cancellationToken);
+        var metadata = await ReadMetadata(file, cancellationToken);
+
+        return new StlModel
+        {
+            Metadata = metadata,
+            Triangles = triangles,
+        };
+    }
+
+    private static async Task<IModelMetadata> ReadMetadata(FileInfo file, CancellationToken cancellationToken)
+    {
+        ModelMetadata? metadata = null;
+
+        var metadataFile = new FileInfo(Path.ChangeExtension(file.FullName, ".json"));
+        if (metadataFile.Exists)
+        {
+            await using var stream = metadataFile.OpenRead();
+            using var reader = new StreamReader(stream);
+
+            var json = await reader.ReadToEndAsync(cancellationToken);
+            metadata = JsonSerializer.Deserialize(json,  ModelSerializerContext.Default.ModelMetadata);
+        }
+
+        return metadata ?? new ModelMetadata
+        {
+            Name = Path.GetFileNameWithoutExtension(file.Name),
+        };
+    }
+
+    private static async Task<Triangle[]> ReadTriangles(FileInfo file, CancellationToken cancellationToken)
     {
         await using var stream = file.OpenRead();
         using var reader = new BinaryReader(stream);
@@ -18,10 +51,15 @@ public class StlModelLoader : IStlModelLoader
             throw new NotSupportedException("ASCII STL files are not supported");
 
         var numberOfTriangles = reader.ReadUInt32();
+        if (numberOfTriangles == 0)
+            throw new InvalidDataException("Invalid STL file: number of triangles is zero");
 
         var triangles = new Triangle[numberOfTriangles];
         for (var i = 0; i < numberOfTriangles; i++)
         {
+            if (cancellationToken.IsCancellationRequested)
+                break;
+
             var normalX = reader.ReadSingle();
             var normalY = reader.ReadSingle();
             var normalZ = reader.ReadSingle();
@@ -51,15 +89,6 @@ public class StlModelLoader : IStlModelLoader
             triangles[i] = triangle;
         }
 
-        return new StlModel
-        {
-            Metadata = new ModelMetadata
-            {
-                Name = Path.GetFileNameWithoutExtension(file.Name),
-                SourceFile = file,
-            },
-            Header = header,
-            Triangles = triangles,
-        };
+        return triangles;
     }
 }
