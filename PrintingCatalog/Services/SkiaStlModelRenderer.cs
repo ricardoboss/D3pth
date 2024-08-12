@@ -18,8 +18,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         using var canvas = surface!.Canvas;
         canvas!.Clear(SKColors.Transparent);
 
-        var cameraPosition = new Vector3(0, 150, 150);
-        var target = new Vector3(0, -190, -150);
+        var cameraPosition = new Vector3(150, 150, 150);
+        var target = new Vector3(0, 0, 0);
         var up = new Vector3(0, -1, 0);
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
@@ -28,17 +28,17 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float ambientIntensity = 0.3f;
         const float diffuseIntensity = 0.7f;
 
-        const float fieldOfView = MathF.PI / 8; // 45 degrees
+        const float fieldOfView = MathF.PI / 6; // 30 degrees
         const float aspectRatio = (float)imageWidth / imageHeight;
         const float nearPlane = 0.1f;
         const float farPlane = 1000f;
         var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, nearPlane, farPlane);
 
-        var modelMatrix = Matrix4x4.CreateScale(1.5f) *
-                          Matrix4x4.CreateRotationZ(MathF.PI);
+        var modelMatrix = 
+            Matrix4x4.CreateScale(2f)
+            * Matrix4x4.CreateReflection(new(new(0.28f, 0.5f, 0), 0))
+            ;
 
-        // var viewProjectionMatrix = projectionMatrix * viewMatrix;
-        // var modelViewProjectionMatrix = viewProjectionMatrix * modelMatrix;
         var modelViewProjectionMatrix = projectionMatrix * modelMatrix;
 
         var modelColor = SKColors.Gray;
@@ -49,8 +49,10 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
-        var projected = ProjectTriangles(stlModel.Triangles, viewMatrix, modelViewProjectionMatrix)
-            .OrderByDescending(t => t.Depth);
+        var modelBaseTranslation = CalculateModelBaseTranslation(stlModel.Triangles);
+        var projected =
+            ProjectTriangles(stlModel.Triangles, modelBaseTranslation, viewMatrix, modelViewProjectionMatrix)
+                .OrderByDescending(t => t.Depth);
 
         foreach (var (normal, a, b, c, _) in projected)
         {
@@ -58,42 +60,53 @@ public class SkiaStlModelRenderer : IStlModelRenderer
                 lightColor, ambientIntensity, diffuseIntensity);
         }
 
-        // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+        DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
 
     private static IEnumerable<ProjectedTriangle> ProjectTriangles(IEnumerable<Triangle> triangles,
-        Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
+        Vector3 modelBaseTranslation, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
     {
-        foreach (var (_, a, b, c, _) in triangles)
+        foreach (var (normal, a, b, c, _) in triangles)
         {
-            var aTransformed = TransformPoint(a, viewMatrix, projectionMatrix);
-            var bTransformed = TransformPoint(b, viewMatrix, projectionMatrix);
-            var cTransformed = TransformPoint(c, viewMatrix, projectionMatrix);
+            var aTransformed = TransformPoint(a + modelBaseTranslation, viewMatrix, projectionMatrix);
+            var bTransformed = TransformPoint(b + modelBaseTranslation, viewMatrix, projectionMatrix);
+            var cTransformed = TransformPoint(c + modelBaseTranslation, viewMatrix, projectionMatrix);
 
-            var depth = Math.Max(aTransformed.Z, Math.Max(bTransformed.Z, cTransformed.Z));
-
-            // not all models have normals
-            var normal = CalculateNormal(a, b, c);
+            var depth = Math.Min(aTransformed.Z, Math.Min(bTransformed.Z, cTransformed.Z));
 
             yield return new(normal, aTransformed, bTransformed, cTransformed, depth);
         }
     }
 
-    private static Vector3 CalculateNormal(Vector3 v1, Vector3 v2, Vector3 v3)
+    private static Vector3 CalculateModelBaseTranslation(Triangle[] triangles)
     {
-        // Calculate the edge vectors
-        var edge1 = v2 - v1;
-        var edge2 = v3 - v1;
+        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
-        // Compute the cross product using the right-hand rule
-        var normal = Vector3.Cross(edge1, edge2);
+        foreach (var (_, a, b, c, _) in triangles)
+        {
+            min = Vector3.Min(min, a);
+            min = Vector3.Min(min, b);
+            min = Vector3.Min(min, c);
 
-        // Normalize the normal vector to ensure it's a unit vector
-        normal = Vector3.Normalize(normal);
+            max = Vector3.Max(max, a);
+            max = Vector3.Max(max, b);
+            max = Vector3.Max(max, c);
+        }
 
-        return normal;
+        var boundingBoxCenter = (max + min) / 2;
+
+        // move y=0 to the bottom of the model
+        // var translateY = -min.Y;
+        var translateY = -boundingBoxCenter.Y;
+
+        // move center of the model so it touches x/z axis
+        var translateX = -boundingBoxCenter.X;
+        var translateZ = -boundingBoxCenter.Z;
+
+        return new(translateX, translateY, translateZ);
     }
 
     private static void DrawGrid(SKCanvas canvas, int width, int height, Matrix4x4 viewMatrix,
