@@ -60,7 +60,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
                 lightColor, ambientIntensity, diffuseIntensity);
         }
 
-        DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+        // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
