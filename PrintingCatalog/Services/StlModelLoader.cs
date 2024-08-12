@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text.Json;
 using PrintingCatalog.Interfaces;
 using PrintingCatalog.Models;
@@ -13,12 +13,23 @@ public class StlModelLoader : IStlModelLoader
         var triangles = await ReadTriangles(file, cancellationToken);
         var metadata = await ReadMetadata(file, cancellationToken);
 
+        var md5Hash = await CalculateMd5Hash(file, cancellationToken);
+
         return new StlModel
         {
             File = file,
             Metadata = metadata,
             Triangles = triangles,
+            Md5Hash = md5Hash,
         };
+    }
+
+    private static async Task<string> CalculateMd5Hash(FileInfo file, CancellationToken cancellationToken)
+    {
+        await using var stream = file.OpenRead();
+        using var md5 = MD5.Create();
+        var hash = await md5.ComputeHashAsync(stream, cancellationToken);
+        return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
     }
 
     private static async Task<IModelMetadata> ReadMetadata(FileInfo file, CancellationToken cancellationToken)
@@ -41,8 +52,6 @@ public class StlModelLoader : IStlModelLoader
 
         if (string.IsNullOrEmpty(metadata.Name))
             metadata.Name = fallbackName;
-
-        metadata.CatalogNumber ??= ((uint)metadata.Name.ToUpper().GetHashCode() % 9999).ToString().PadLeft(4, '0');
 
         return metadata;
     }

@@ -31,11 +31,12 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float aspectRatio = (float)imageWidth / imageHeight;
         const float nearPlane = 0.1f;
         const float farPlane = 1000f;
-        
+
         var zoom = stlModel.Metadata.Zoom ?? 1;
         var actualFieldOfView = fieldOfView / zoom;
-        
-        var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(actualFieldOfView, aspectRatio, nearPlane, farPlane);
+
+        var projectionMatrix =
+            Matrix4x4.CreatePerspectiveFieldOfView(actualFieldOfView, aspectRatio, nearPlane, farPlane);
 
         var modelMatrix = Matrix4x4.Identity;
 
@@ -62,16 +63,35 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)
                 .OrderByDescending(t => t.Depth);
 
-        foreach (var (normal, a, b, c, _) in projected)
-        {
-            DrawTriangleShaded(canvas, imageWidth, imageHeight, normal, a, b, c, modelColor, lightPosition,
-                lightColor, ambientIntensity, diffuseIntensity);
-        }
+        DrawModelShaded(projected, canvas, imageWidth, imageHeight, modelColor, lightPosition, lightColor,
+            ambientIntensity, diffuseIntensity);
+        // DrawModelDebug(projected, canvas, imageWidth, imageHeight);
 
         // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
         // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
+    }
+
+    private static void DrawModelShaded(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+        int imageWidth, int imageHeight,
+        SKColor modelColor, Vector3 lightPosition, SKColor lightColor, float ambientIntensity, float diffuseIntensity)
+    {
+        foreach (var (normal, a, b, c, _) in projected)
+        {
+            DrawTriangleShaded(canvas, imageWidth, imageHeight, normal, a, b, c, modelColor, lightPosition,
+                lightColor, ambientIntensity, diffuseIntensity);
+        }
+    }
+
+    private static void DrawModelDebug(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+        int imageWidth, int imageHeight)
+    {
+        var index = 0;
+        foreach (var (_, a, b, c, _) in projected)
+        {
+            DrawTriangleDebug(canvas, imageWidth, imageHeight, index++, a, b, c);
+        }
     }
 
     private static Matrix4x4 CalculateModelRotation(Plane? basePlane, float? yAxisRotation)
@@ -106,8 +126,12 @@ public class SkiaStlModelRenderer : IStlModelRenderer
                 throw new ArgumentOutOfRangeException(nameof(basePlane), basePlane, null);
         }
 
-        if (yAxisRotation is { } yDeg)
-            rotation *= Matrix4x4.CreateRotationY(yDeg * MathF.PI / 180);
+        if (yAxisRotation is not { } yDeg)
+            return rotation;
+
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(yDeg), 180, "Rotation");
+
+        rotation *= Matrix4x4.CreateRotationY(yDeg * MathF.PI / 180);
 
         return rotation;
     }
@@ -157,7 +181,6 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var boundingBoxCenter = (max + min) / 2;
 
         // move y=0 to the bottom of the model
-        // var translateY = -min.Y;
         var translateY = -boundingBoxCenter.Y;
 
         // move center of the model, so it touches x/z axis
@@ -199,7 +222,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
     }
 
-    private static void DrawSun(SKCanvas canvas, int width, int height, Vector3 lightPosition, SKColor lightColor, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
+    private static void DrawSun(SKCanvas canvas, int width, int height, Vector3 lightPosition, SKColor lightColor,
+        Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
     {
         var sunRadius = 20;
 
@@ -280,6 +304,35 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         DrawTriangle(canvas, width, height, a, b, c, paint);
     }
+    
+    private static void DrawTriangleDebug(SKCanvas canvas,
+        int width,
+        int height,
+        int index,
+        Vector3 a,
+        Vector3 b,
+        Vector3 c)
+    {
+        // Convert to screen space (e.g., from -1..1 to canvas size)
+        var p1 = new SKPoint((a.X + 1) * width / 2, (a.Y + 1) * height / 2);
+        var p2 = new SKPoint((b.X + 1) * width / 2, (b.Y + 1) * height / 2);
+        var p3 = new SKPoint((c.X + 1) * width / 2, (c.Y + 1) * height / 2);
+
+        using var path = new SKPath();
+        path.FillType = SKPathFillType.EvenOdd;
+        path.MoveTo(p1);
+        path.LineTo(p2);
+        path.LineTo(p3);
+        path.LineTo(p1);
+
+        using var paint = new SKPaint();
+        paint.Color = SKColor.FromHsl(index % 360, 255, 128, 40);
+        paint.Style = SKPaintStyle.Stroke;
+        paint.StrokeWidth = 1;
+        paint.IsAntialias = true;
+
+        canvas.DrawPath(path, paint);
+    }
 
     private static void DrawTriangle(
         SKCanvas canvas,
@@ -303,6 +356,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         path.LineTo(p2);
         path.LineTo(p3);
         path.LineTo(p1);
+
         canvas.DrawPath(path, paint);
     }
 

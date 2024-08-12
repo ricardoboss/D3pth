@@ -4,8 +4,6 @@ namespace PrintingCatalog.Interfaces;
 
 public interface IModelMetadata
 {
-    string? CatalogNumber { get; }
-
     string? Name { get; }
 
     string? Description { get; }

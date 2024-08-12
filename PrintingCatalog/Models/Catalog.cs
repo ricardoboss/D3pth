@@ -20,7 +20,7 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
         page.Content().Column(c =>
         {
             c.Spacing(16);
-            c.Item().Text("Ricardo's großer 3D-Drucker Katalog").FontSize(20).AlignCenter();
+            c.Item().Text("Ricardos großer 3D-Druck Katalog").FontSize(20).AlignCenter();
             c.Item().Text("Sortiert nach Name");
             c.Item().Table(ComposePreviewTable);
         });
@@ -44,9 +44,9 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
             c.Cell().Border(1).Padding(5).Text("Beschreibung");
         });
 
-        foreach (var model in models.DistinctBy(m => m.Metadata.CatalogNumber).OrderBy(m => m.Metadata.Name))
+        foreach (var model in models.DistinctBy(m => m.Md5Hash).OrderBy(m => m.Metadata.Name))
         {
-            table.Cell().Border(1).Padding(5).Text(model.Metadata.CatalogNumber);
+            table.Cell().Border(1).Padding(5).Text(model.Md5Hash[..4]);
 
             var imageCell = table.Cell().Border(1).Padding(5);
             try
@@ -95,11 +95,11 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
             c.Cell().Border(1).Padding(5).Text("Datei");
         });
 
-        foreach (var model in models.DistinctBy(m => m.Metadata.CatalogNumber).OrderBy(m => m.Metadata.CatalogNumber))
+        foreach (var model in models.DistinctBy(m => m.Md5Hash).OrderBy(m => m.Md5Hash))
         {
             var relativePath = Path.GetRelativePath(baseDirectory.FullName, model.File.FullName);
 
-            table.Cell().Padding(5).Text(model.Metadata.CatalogNumber);
+            table.Cell().Padding(5).Text(model.Md5Hash[..4]);
             table.Cell().Padding(5).Text(model.Metadata.Name);
             table.Cell().Padding(5).Text(relativePath).FontSize(10);
         }
