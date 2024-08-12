@@ -34,7 +34,7 @@ internal sealed class RenderCommand(
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = await stlModelRenderer.RenderToPngAsync(model);
+        var image = stlModelRenderer.RenderToPng(model);
         var imageFile = new FileInfo($"{Path.GetFileNameWithoutExtension(file.Name)}.png");
         await using var stream = imageFile.OpenWrite();
         await stream.WriteAsync(image);

@@ -33,10 +33,16 @@ public class StlModelLoader : IStlModelLoader
             metadata = JsonSerializer.Deserialize(json,  ModelSerializerContext.Default.ModelMetadata);
         }
 
-        return metadata ?? new ModelMetadata
-        {
-            Name = Path.GetFileNameWithoutExtension(file.Name),
-        };
+        var fallbackName = Path.GetFileNameWithoutExtension(file.Name);
+
+        metadata ??= new();
+
+        if (string.IsNullOrEmpty(metadata.Name))
+            metadata.Name = fallbackName;
+
+        metadata.CatalogNumber ??= (uint)metadata.Name.ToUpper().GetHashCode() % 9999;
+
+        return metadata;
     }
 
     private static async Task<Triangle[]> ReadTriangles(FileInfo file, CancellationToken cancellationToken)

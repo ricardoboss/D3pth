@@ -2,13 +2,11 @@ using System.Numerics;
 using PrintingCatalog.Interfaces;
 using SkiaSharp;
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-
 namespace PrintingCatalog.Services;
 
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public async Task<byte[]> RenderToPngAsync(IStlModel stlModel, CancellationToken cancellationToken = default)
+    public byte[] RenderToPng(IStlModel stlModel)
     {
         const int imageWidth = 1024;
         const int imageHeight = 1024;

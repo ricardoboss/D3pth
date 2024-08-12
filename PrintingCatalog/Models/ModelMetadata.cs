@@ -4,7 +4,9 @@ namespace PrintingCatalog.Models;
 
 public class ModelMetadata : IModelMetadata
 {
-    public string? Name { get; init; }
+    public uint? CatalogNumber { get; set; }
+
+    public string? Name { get; set; }
 
     public string? Description { get; init; }
 
