@@ -10,11 +10,15 @@ public interface IModelMetadata
 
     string? Description { get; }
 
+    string? Category { get; }
+
+    string? Subcategory { get; }
+
     string? Color { get; }
 
     Plane? BasePlane { get; }
 
-    Plane? FrontPlane { get; }
+    float? Rotation { get; }
 
     float? Zoom { get; }
 }

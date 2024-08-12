@@ -46,7 +46,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var modelBaseTranslation = CalculateModelBaseTranslation(stlModel.Triangles, modelMatrix);
         modelMatrix *= Matrix4x4.CreateTranslation(modelBaseTranslation);
         var modelRotation =
-            CalculateModelRotation(stlModel.Metadata.BasePlane, stlModel.Metadata.FrontPlane);
+            CalculateModelRotation(stlModel.Metadata.BasePlane, stlModel.Metadata.Rotation);
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
@@ -74,7 +74,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
 
-    private static Matrix4x4 CalculateModelRotation(Plane? basePlane, Plane? frontPlane)
+    private static Matrix4x4 CalculateModelRotation(Plane? basePlane, float? yAxisRotation)
     {
         // basePlane and frontPlane are relative to the model
         // we need to rotate the model so that the base plane matches the xz-plane and the front plane matches the yz-plane
@@ -106,31 +106,9 @@ public class SkiaStlModelRenderer : IStlModelRenderer
                 throw new ArgumentOutOfRangeException(nameof(basePlane), basePlane, null);
         }
 
-        switch (frontPlane)
-        {
-            case Plane.XY:
-                rotation *= Matrix4x4.CreateRotationY(-MathF.PI / 2); // checked
-                break;
-            case Plane.XZ:
-                rotation *= Matrix4x4.CreateRotationY(MathF.PI / 2);
-                break;
-            case Plane.YZ:
-                rotation *= Matrix4x4.CreateRotationY(MathF.PI); // checked
-                break;
-            case Plane.NegativeXY:
-                rotation *= Matrix4x4.CreateRotationY(MathF.PI / 2); // checked
-                break;
-            case Plane.NegativeXZ:
-                rotation *= Matrix4x4.CreateRotationY(-MathF.PI / 2);
-                break;
-            case Plane.NegativeYZ:
-                break; // checked
-            case null:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(frontPlane), frontPlane, null);
-        }
-        
+        if (yAxisRotation is { } yDeg)
+            rotation *= Matrix4x4.CreateRotationY(yDeg * MathF.PI / 180);
+
         return rotation;
     }
 
