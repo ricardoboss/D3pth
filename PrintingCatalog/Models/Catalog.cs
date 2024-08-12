@@ -4,7 +4,8 @@ using QuestPDF.Infrastructure;
 
 namespace PrintingCatalog.Models;
 
-public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory) : ICatalog, IDocument
+public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
+    : ICatalog, IDocument
 {
     byte[] ICatalog.GeneratePdf() => this.GeneratePdf();
 
@@ -73,7 +74,8 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
             c.Spacing(16);
             c.Item().Text("Sortiert nach Katalognummer");
             c.Item().Table(ComposeSortedTable);
-            c.Item().Text("Generated on " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).FontSize(8);
+            c.Item().Text($"Generated on {DateTime.Now:yyyy-MM-dd HH:mm:ss} - Base Directory: {baseDirectory.FullName}")
+                .FontSize(8);
         });
     }
 
