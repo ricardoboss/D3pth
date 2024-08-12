@@ -3,6 +3,7 @@ using System.Diagnostics;
 using PrintingCatalog.Interfaces;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace PrintingCatalog.Commands;
@@ -22,12 +23,20 @@ internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncComman
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        AnsiConsole.MarkupLine("[green]Generating catalog...[/]");
+
+        var stopwatch = Stopwatch.StartNew();
         var catalog = await generator.GenerateAsync(Directory.GetCurrentDirectory());
+        stopwatch.Stop();
+
+        AnsiConsole.MarkupLine($"[green]Generated catalog in [bold]{stopwatch.Elapsed}[/][/]");
 
         if (settings.Preview)
         {
             var document = catalog as IDocument ?? throw new NotSupportedException(
                 $"Expected QuestPDF.Infrastructure.IDocument, but got {catalog.GetType().FullName} instead");
+
+            AnsiConsole.MarkupLine("[green]Opening previewer...[/]");
 
             await document.ShowInPreviewerAsync();
         }
@@ -36,11 +45,17 @@ internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncComman
         else
             throw new ArgumentException("Either --preview or --output must be specified");
 
+        AnsiConsole.MarkupLine("[green]Done![/]");
+
         return 0;
     }
 
-    private async Task StoreOnDiskAsync(ICatalog catalog, string path)
+    private static async Task StoreOnDiskAsync(ICatalog catalog, string path)
     {
-        throw new NotImplementedException();
+        AnsiConsole.MarkupLine($"[green]Saving to '[bold]{path}[/]'[/]");
+
+        await using var stream = File.OpenWrite(path);
+
+        await stream.WriteAsync(catalog.GeneratePdf());
     }
 }

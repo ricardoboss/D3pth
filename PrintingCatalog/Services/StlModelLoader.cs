@@ -30,7 +30,7 @@ public class StlModelLoader : IStlModelLoader
             using var reader = new StreamReader(stream);
 
             var json = await reader.ReadToEndAsync(cancellationToken);
-            metadata = JsonSerializer.Deserialize(json,  ModelSerializerContext.Default.ModelMetadata);
+            metadata = JsonSerializer.Deserialize(json, ModelSerializerContext.Default.ModelMetadata);
         }
 
         var fallbackName = Path.GetFileNameWithoutExtension(file.Name);
@@ -40,7 +40,7 @@ public class StlModelLoader : IStlModelLoader
         if (string.IsNullOrEmpty(metadata.Name))
             metadata.Name = fallbackName;
 
-        metadata.CatalogNumber ??= (uint)metadata.Name.ToUpper().GetHashCode() % 9999;
+        metadata.CatalogNumber ??= ((uint)metadata.Name.ToUpper().GetHashCode() % 9999).ToString().PadLeft(4, '0');
 
         return metadata;
     }
@@ -52,14 +52,14 @@ public class StlModelLoader : IStlModelLoader
 
         var header = new byte[80];
         if (reader.Read(header, 0, 80) != 80)
-            throw new InvalidDataException("Invalid STL file: header is missing or incomplete");
+            throw new InvalidDataException($"Invalid STL file: header is missing or incomplete ({file.FullName})");
 
-        if (header.AsSpan().StartsWith("solid"u8))
-            throw new NotSupportedException("ASCII STL files are not supported");
+        // if (header.AsSpan().StartsWith("solid"u8))
+        //     throw new NotSupportedException($"ASCII STL files are not supported ({file.FullName})");
 
         var numberOfTriangles = reader.ReadUInt32();
         if (numberOfTriangles == 0)
-            throw new InvalidDataException("Invalid STL file: number of triangles is zero");
+            throw new InvalidDataException($"Invalid STL file: number of triangles is zero ({file.FullName})");
 
         var triangles = new Triangle[numberOfTriangles];
         for (var i = 0; i < numberOfTriangles; i++)

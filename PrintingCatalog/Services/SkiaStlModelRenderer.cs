@@ -1,6 +1,7 @@
 using System.Numerics;
 using PrintingCatalog.Interfaces;
 using SkiaSharp;
+using Plane = PrintingCatalog.Interfaces.Plane;
 
 namespace PrintingCatalog.Services;
 
@@ -16,15 +17,15 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         using var canvas = surface!.Canvas;
         canvas!.Clear(SKColors.Transparent);
 
-        var cameraPosition = new Vector3(150, 150, 150);
+        var cameraPosition = new Vector3(150, 80, 150);
         var target = new Vector3(0, 0, 0);
         var up = new Vector3(0, -1, 0);
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
-        var lightPosition = new Vector3(200, 200, 200);
+        var lightPosition = new Vector3(-500, -500, 1000);
         var lightColor = SKColors.Wheat;
         const float ambientIntensity = 0.3f;
-        const float diffuseIntensity = 0.7f;
+        const float diffuseIntensity = 0.8f;
 
         const float fieldOfView = MathF.PI / 6; // 30 degrees
         const float aspectRatio = (float)imageWidth / imageHeight;
@@ -32,12 +33,18 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float farPlane = 1000f;
         var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, nearPlane, farPlane);
 
-        var modelMatrix = 
-            Matrix4x4.CreateScale(2f)
-            * Matrix4x4.CreateReflection(new(new(0.28f, 0.5f, 0), 0))
-            ;
+        var modelMatrix = Matrix4x4.Identity;
 
-        var modelViewProjectionMatrix = projectionMatrix * modelMatrix;
+        // hack: models seem to be flipped in the x-axis and have x/y as their base plane
+        modelMatrix *= Matrix4x4.CreateScale(-1, 1, 1); // flip x-axis
+        modelMatrix *= Matrix4x4.CreateRotationX(-MathF.PI / 2); // rotate about x-axis so y-axis is up
+
+        var modelBaseTranslation = CalculateModelBaseTranslation(stlModel.Triangles, modelMatrix);
+        modelMatrix *= Matrix4x4.CreateTranslation(modelBaseTranslation);
+        var modelRotation =
+            CalculateModelRotation(stlModel.Metadata.BasePlane, stlModel.Metadata.FrontPlane);
+        modelMatrix *= modelRotation;
+        modelMatrix *= Matrix4x4.CreateScale(2f);
 
         var modelColor = SKColors.Gray;
         if (stlModel.Metadata.Color is { } color)
@@ -47,9 +54,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
-        var modelBaseTranslation = CalculateModelBaseTranslation(stlModel.Triangles);
         var projected =
-            ProjectTriangles(stlModel.Triangles, modelBaseTranslation, viewMatrix, modelViewProjectionMatrix)
+            ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)
                 .OrderByDescending(t => t.Depth);
 
         foreach (var (normal, a, b, c, _) in projected)
@@ -63,35 +69,104 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
 
+    private static Matrix4x4 CalculateModelRotation(Plane? basePlane, Plane? frontPlane)
+    {
+        // basePlane and frontPlane are relative to the model
+        // we need to rotate the model so that the base plane matches the xz-plane and the front plane matches the yz-plane
+
+        var rotation = Matrix4x4.Identity;
+
+        switch (basePlane)
+        {
+            case Plane.XY:
+                rotation *= Matrix4x4.CreateRotationX(-MathF.PI / 2);
+                break;
+            case Plane.XZ:
+                break;
+            case Plane.YZ:
+                rotation *= Matrix4x4.CreateRotationZ(MathF.PI / 2);
+                break;
+            case Plane.NegativeXY:
+                rotation *= Matrix4x4.CreateRotationX(MathF.PI / 2);
+                break;
+            case Plane.NegativeXZ:
+                rotation *= Matrix4x4.CreateRotationZ(MathF.PI) * Matrix4x4.CreateRotationY(MathF.PI);
+                break;
+            case Plane.NegativeYZ:
+                rotation *= Matrix4x4.CreateRotationZ(-MathF.PI / 2);
+                break;
+            case null:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(basePlane), basePlane, null);
+        }
+
+        switch (frontPlane)
+        {
+            case Plane.XY:
+                rotation *= Matrix4x4.CreateRotationY(-MathF.PI / 2); // checked
+                break;
+            case Plane.XZ:
+                rotation *= Matrix4x4.CreateRotationY(MathF.PI / 2);
+                break;
+            case Plane.YZ:
+                rotation *= Matrix4x4.CreateRotationY(MathF.PI); // checked
+                break;
+            case Plane.NegativeXY:
+                rotation *= Matrix4x4.CreateRotationY(MathF.PI / 2); // checked
+                break;
+            case Plane.NegativeXZ:
+                rotation *= Matrix4x4.CreateRotationY(-MathF.PI / 2);
+                break;
+            case Plane.NegativeYZ:
+                break; // checked
+            case null:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(frontPlane), frontPlane, null);
+        }
+        
+        return rotation;
+    }
+
     private static IEnumerable<ProjectedTriangle> ProjectTriangles(IEnumerable<Triangle> triangles,
-        Vector3 modelBaseTranslation, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
+        Matrix4x4 modelMatrix, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
     {
         foreach (var (normal, a, b, c, _) in triangles)
         {
-            var aTransformed = TransformPoint(a + modelBaseTranslation, viewMatrix, projectionMatrix);
-            var bTransformed = TransformPoint(b + modelBaseTranslation, viewMatrix, projectionMatrix);
-            var cTransformed = TransformPoint(c + modelBaseTranslation, viewMatrix, projectionMatrix);
+            
+            var modelA = Vector3.Transform(a, modelMatrix);
+            var modelB = Vector3.Transform(b, modelMatrix);
+            var modelC = Vector3.Transform(c, modelMatrix);
 
-            var depth = Math.Min(aTransformed.Z, Math.Min(bTransformed.Z, cTransformed.Z));
+            var projectedA = TransformPoint(modelA, viewMatrix, projectionMatrix);
+            var projectedB = TransformPoint(modelB, viewMatrix, projectionMatrix);
+            var projectedC = TransformPoint(modelC, viewMatrix, projectionMatrix);
 
-            yield return new(normal, aTransformed, bTransformed, cTransformed, depth);
+            var depth = Math.Min(projectedA.Z, Math.Min(projectedB.Z, projectedC.Z));
+
+            yield return new(normal, projectedA, projectedB, projectedC, depth);
         }
     }
 
-    private static Vector3 CalculateModelBaseTranslation(Triangle[] triangles)
+    private static Vector3 CalculateModelBaseTranslation(Triangle[] triangles, Matrix4x4 modelMatrix)
     {
         var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
         var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
         foreach (var (_, a, b, c, _) in triangles)
         {
-            min = Vector3.Min(min, a);
-            min = Vector3.Min(min, b);
-            min = Vector3.Min(min, c);
+            var transformedA = Vector3.Transform(a, modelMatrix);
+            var transformedB = Vector3.Transform(b, modelMatrix);
+            var transformedC = Vector3.Transform(c, modelMatrix);
 
-            max = Vector3.Max(max, a);
-            max = Vector3.Max(max, b);
-            max = Vector3.Max(max, c);
+            min = Vector3.Min(min, transformedA);
+            min = Vector3.Min(min, transformedB);
+            min = Vector3.Min(min, transformedC);
+
+            max = Vector3.Max(max, transformedA);
+            max = Vector3.Max(max, transformedB);
+            max = Vector3.Max(max, transformedC);
         }
 
         var boundingBoxCenter = (max + min) / 2;
@@ -114,7 +189,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const int gridStep = 10;
 
         using var paint = new SKPaint();
-        paint.Color = SKColors.Gray.WithAlpha(30);
+        paint.Color = SKColors.Gray.WithAlpha(60);
 
         for (var x = -gridSize; x <= gridSize; x += gridStep)
         {
