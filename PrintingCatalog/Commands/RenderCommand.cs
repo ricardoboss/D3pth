@@ -18,10 +18,10 @@ internal sealed class RenderCommand(
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var files = settings.File is null
-            ? fileDiscoverer.DiscoverAsync(Directory.GetCurrentDirectory(), extensions: "stl")
-            : new List<FileInfo> { new(settings.File) }.ToAsyncEnumerable();
+            ? fileDiscoverer.Discover(Directory.GetCurrentDirectory())
+            : new List<FileInfo> { new(settings.File) };
 
-        await foreach (var file in files)
+        foreach (var file in files)
             await RenderFile(file);
 
         return 0;
@@ -35,7 +35,7 @@ internal sealed class RenderCommand(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
         var image = stlModelRenderer.RenderToPng(model);
-        var imageFile = new FileInfo($"{Path.GetFileNameWithoutExtension(file.Name)}.png");
+        var imageFile = new FileInfo(file.FullName.Replace(".stl", ".png"));
         await using var stream = imageFile.OpenWrite();
         await stream.WriteAsync(image);
 

@@ -1,21 +1,12 @@
-using System.Runtime.CompilerServices;
 using PrintingCatalog.Interfaces;
 
 namespace PrintingCatalog.Services;
 
 public class RecursiveFileDiscoverer : IFileDiscoverer
 {
-    public async IAsyncEnumerable<FileInfo> DiscoverAsync(string path,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default,
-        params string[] extensions)
+    public IEnumerable<FileInfo> Discover(string path, string extension = "stl")
     {
-        foreach (var file in Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories))
-        {
-            if (cancellationToken.IsCancellationRequested)
-                yield break;
-
-            if (extensions.Any(e => file.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
-                yield return new(file);
-        }
+        return Directory.EnumerateFiles(path, $"*.{extension}", SearchOption.AllDirectories)
+            .Select(file => new FileInfo(file));
     }
 }

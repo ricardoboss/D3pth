@@ -2,6 +2,5 @@ namespace PrintingCatalog.Interfaces;
 
 public interface IFileDiscoverer
 {
-    IAsyncEnumerable<FileInfo> DiscoverAsync(string path, CancellationToken cancellationToken = default,
-        params string[] extensions);
+    IEnumerable<FileInfo> Discover(string path, string extension = "stl");
 }

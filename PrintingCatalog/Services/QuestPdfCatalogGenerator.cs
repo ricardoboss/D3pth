@@ -24,7 +24,7 @@ internal sealed class QuestPdfCatalogGenerator(
     private async IAsyncEnumerable<IStlModel> LoadModelsAsync(string sourceFolder,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var modelFile in fileDiscoverer.DiscoverAsync(sourceFolder, extensions: "stl").WithCancellation(cancellationToken))
+        foreach (var modelFile in fileDiscoverer.Discover(sourceFolder))
             yield return await stlModelLoader.LoadAsync(modelFile, cancellationToken);
     }
 }
