@@ -17,7 +17,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         using var canvas = surface!.Canvas;
         canvas!.Clear(SKColors.Transparent);
 
-        var cameraPosition = new Vector3(150, 80, 150);
+        var cameraPosition = new Vector3(150, 90, 150);
         var target = new Vector3(0, 0, 0);
         var up = new Vector3(0, -1, 0); // kinda hacky?
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
