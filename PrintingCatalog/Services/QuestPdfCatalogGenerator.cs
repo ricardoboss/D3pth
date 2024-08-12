@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using PrintingCatalog.Interfaces;
 using PrintingCatalog.Models;
 using QuestPDF.Infrastructure;
+using Spectre.Console;
 
 namespace PrintingCatalog.Services;
 
@@ -25,6 +26,19 @@ internal sealed class QuestPdfCatalogGenerator(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var modelFile in fileDiscoverer.Discover(sourceFolder))
-            yield return await stlModelLoader.LoadAsync(modelFile, cancellationToken);
+        {
+            IStlModel? model = null;
+            try
+            {
+                model = await stlModelLoader.LoadAsync(modelFile, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.MarkupLine($"[red]Error loading '[bold]{modelFile.FullName}[/]': {e.Message}[/]");
+            }
+
+            if (model is not null)
+                yield return model;
+        }
     }
 }
