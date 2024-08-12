@@ -35,7 +35,7 @@ internal sealed class RenderCommand(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
         var image = stlModelRenderer.RenderToPng(model);
-        var imageFile = new FileInfo(file.FullName.Replace(".stl", ".png"));
+        var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, ".png"));
         await using var stream = imageFile.OpenWrite();
         await stream.WriteAsync(image);
 
