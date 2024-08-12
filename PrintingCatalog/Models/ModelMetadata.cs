@@ -15,4 +15,6 @@ public class ModelMetadata : IModelMetadata
     public Plane? BasePlane { get; init; }
 
     public Plane? FrontPlane { get; init; }
+
+    public float? Zoom { get; init; }
 }

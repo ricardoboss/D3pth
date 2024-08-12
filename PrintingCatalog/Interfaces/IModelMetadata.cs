@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PrintingCatalog.Interfaces;
 
 public interface IModelMetadata
@@ -13,8 +15,11 @@ public interface IModelMetadata
     Plane? BasePlane { get; }
 
     Plane? FrontPlane { get; }
+
+    float? Zoom { get; }
 }
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public enum Plane
 {
     XY,
@@ -22,5 +27,5 @@ public enum Plane
     YZ,
     NegativeXY,
     NegativeXZ,
-    NegativeYZ
+    NegativeYZ,
 }

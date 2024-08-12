@@ -19,19 +19,23 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         var cameraPosition = new Vector3(150, 80, 150);
         var target = new Vector3(0, 0, 0);
-        var up = new Vector3(0, -1, 0);
+        var up = new Vector3(0, -1, 0); // kinda hacky?
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
-        var lightPosition = new Vector3(-500, -500, 1000);
+        var lightPosition = new Vector3(-100, -150, 200);
         var lightColor = SKColors.Wheat;
-        const float ambientIntensity = 0.3f;
-        const float diffuseIntensity = 0.8f;
+        const float ambientIntensity = 0.5f;
+        const float diffuseIntensity = 0.9f;
 
         const float fieldOfView = MathF.PI / 6; // 30 degrees
         const float aspectRatio = (float)imageWidth / imageHeight;
         const float nearPlane = 0.1f;
         const float farPlane = 1000f;
-        var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, nearPlane, farPlane);
+        
+        var zoom = stlModel.Metadata.Zoom ?? 1;
+        var actualFieldOfView = fieldOfView / zoom;
+        
+        var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(actualFieldOfView, aspectRatio, nearPlane, farPlane);
 
         var modelMatrix = Matrix4x4.Identity;
 
@@ -65,6 +69,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
 
         // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+        // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
@@ -134,7 +139,6 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     {
         foreach (var (normal, a, b, c, _) in triangles)
         {
-            
             var modelA = Vector3.Transform(a, modelMatrix);
             var modelB = Vector3.Transform(b, modelMatrix);
             var modelC = Vector3.Transform(c, modelMatrix);
@@ -143,13 +147,16 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var projectedB = TransformPoint(modelB, viewMatrix, projectionMatrix);
             var projectedC = TransformPoint(modelC, viewMatrix, projectionMatrix);
 
-            var depth = Math.Min(projectedA.Z, Math.Min(projectedB.Z, projectedC.Z));
+            var minDepth = Math.Min(projectedA.Z, Math.Min(projectedB.Z, projectedC.Z));
+            var maxDepth = Math.Max(projectedA.Z, Math.Max(projectedB.Z, projectedC.Z));
+
+            var depth = minDepth + (maxDepth - minDepth) / 2;
 
             yield return new(normal, projectedA, projectedB, projectedC, depth);
         }
     }
 
-    private static Vector3 CalculateModelBaseTranslation(Triangle[] triangles, Matrix4x4 modelMatrix)
+    private static Vector3 CalculateModelBaseTranslation(IEnumerable<Triangle> triangles, Matrix4x4 modelMatrix)
     {
         var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
         var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -175,7 +182,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         // var translateY = -min.Y;
         var translateY = -boundingBoxCenter.Y;
 
-        // move center of the model so it touches x/z axis
+        // move center of the model, so it touches x/z axis
         var translateX = -boundingBoxCenter.X;
         var translateZ = -boundingBoxCenter.Z;
 
@@ -183,7 +190,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     }
 
     private static void DrawGrid(SKCanvas canvas, int width, int height, Matrix4x4 viewMatrix,
-        Matrix4x4 viewProjectionMatrix)
+        Matrix4x4 projectionMatrix)
     {
         const int gridSize = 100;
         const int gridStep = 10;
@@ -196,8 +203,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var a = new Vector3(x, 0, -gridSize);
             var b = new Vector3(x, 0, gridSize);
 
-            var aTransformed = TransformPoint(a, viewMatrix, viewProjectionMatrix);
-            var bTransformed = TransformPoint(b, viewMatrix, viewProjectionMatrix);
+            var aTransformed = TransformPoint(a, viewMatrix, projectionMatrix);
+            var bTransformed = TransformPoint(b, viewMatrix, projectionMatrix);
 
             DrawLine(canvas, width, height, aTransformed, bTransformed, paint);
         }
@@ -207,15 +214,27 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var a = new Vector3(-gridSize, 0, z);
             var b = new Vector3(gridSize, 0, z);
 
-            var aTransformed = TransformPoint(a, viewMatrix, viewProjectionMatrix);
-            var bTransformed = TransformPoint(b, viewMatrix, viewProjectionMatrix);
+            var aTransformed = TransformPoint(a, viewMatrix, projectionMatrix);
+            var bTransformed = TransformPoint(b, viewMatrix, projectionMatrix);
 
             DrawLine(canvas, width, height, aTransformed, bTransformed, paint);
         }
     }
 
+    private static void DrawSun(SKCanvas canvas, int width, int height, Vector3 lightPosition, SKColor lightColor, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
+    {
+        var sunRadius = 20;
+
+        using var paint = new SKPaint();
+        paint.Color = lightColor;
+
+        var sunRadiusTransformed = TransformPoint(lightPosition, viewMatrix, projectionMatrix);
+
+        DrawCircle(canvas, width, height, sunRadiusTransformed, sunRadius, paint);
+    }
+
     private static void DrawAxes(SKCanvas canvas, int width, int height, Matrix4x4 viewMatrix,
-        Matrix4x4 viewProjectionMatrix)
+        Matrix4x4 projectionMatrix)
     {
         var origin = new Vector3(0, 0, 0);
         var xAxis = new Vector3(100, 0, 0);
@@ -231,10 +250,10 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         using var zAxisPaint = new SKPaint();
         zAxisPaint.Color = SKColors.Green;
 
-        var originTransformed = TransformPoint(origin, viewMatrix, viewProjectionMatrix);
-        var xAxisTransformed = TransformPoint(xAxis, viewMatrix, viewProjectionMatrix);
-        var yAxisTransformed = TransformPoint(yAxis, viewMatrix, viewProjectionMatrix);
-        var zAxisTransformed = TransformPoint(zAxis, viewMatrix, viewProjectionMatrix);
+        var originTransformed = TransformPoint(origin, viewMatrix, projectionMatrix);
+        var xAxisTransformed = TransformPoint(xAxis, viewMatrix, projectionMatrix);
+        var yAxisTransformed = TransformPoint(yAxis, viewMatrix, projectionMatrix);
+        var zAxisTransformed = TransformPoint(zAxis, viewMatrix, projectionMatrix);
 
         DrawLine(canvas, width, height, originTransformed, xAxisTransformed, xAxisPaint);
         DrawLine(canvas, width, height, originTransformed, yAxisTransformed, yAxisPaint);
@@ -319,6 +338,15 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         canvas.DrawLine(p1, p2, paint);
     }
 
+    private static void DrawCircle(SKCanvas canvas, int width, int height, Vector3 center, float radius, SKPaint paint)
+    {
+        // Convert to screen space (e.g., from -1..1 to canvas size)
+        var p1 = new SKPoint((center.X + 1) * width / 2, (center.Y + 1) * height / 2);
+
+        // Draw the circle
+        canvas.DrawCircle(p1.X, p1.Y, radius, paint);
+    }
+
     private static SKColor CalculateShading(
         Vector3 normal,
         Vector3 lightPos,
@@ -332,22 +360,16 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         // Calculate the light direction
         var lightDir = Vector3.Normalize(lightPos - vertex);
 
-        // Normalize the normal
-        var normalizedNormal = Vector3.Normalize(normal);
-
         // Calculate the diffuse intensity using Lambert's cosine law
-        var diffuse = MathF.Max(Vector3.Dot(normalizedNormal, lightDir), 0.0f);
+        var diffuse = MathF.Max(Vector3.Dot(normal, lightDir), 0.0f);
 
         // Calculate final intensity
-        var finalIntensity = ambientIntensity + (diffuseIntensity * diffuse);
-
-        // Ensure the intensity is within the range [0, 1]
-        finalIntensity = MathF.Min(finalIntensity, 1.0f);
+        var intensity = ambientIntensity + diffuseIntensity * diffuse;
 
         // Apply the light color to the intensity
-        var r = (byte)(modelColor.Red * finalIntensity * (lightColor.Red / 255.0f));
-        var g = (byte)(modelColor.Green * finalIntensity * (lightColor.Green / 255.0f));
-        var b = (byte)(modelColor.Blue * finalIntensity * (lightColor.Blue / 255.0f));
+        var r = (byte)Math.Min(modelColor.Red * intensity * (lightColor.Red / 255.0f), 255);
+        var g = (byte)Math.Min(modelColor.Green * intensity * (lightColor.Green / 255.0f), 255);
+        var b = (byte)Math.Min(modelColor.Blue * intensity * (lightColor.Blue / 255.0f), 255);
 
         return new(r, g, b, modelColor.Alpha); // Preserve the original alpha channel
     }
