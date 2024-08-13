@@ -22,7 +22,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var up = new Vector3(0, -1, 0); // kinda hacky?
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
-        var lightPosition = new Vector3(-100, -150, 200);
+        var lightPosition = new Vector3(-80, -150, 200);
         var lightColor = SKColors.White;
         const float ambientIntensity = 0.45f;
         const float diffuseIntensity = 0.6f;
