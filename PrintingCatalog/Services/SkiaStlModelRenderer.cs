@@ -17,15 +17,15 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         using var canvas = surface!.Canvas;
         canvas!.Clear(SKColors.Transparent);
 
-        var cameraPosition = new Vector3(150, 90, 150);
+        var cameraPosition = new Vector3(150, 100, 150);
         var target = new Vector3(0, 0, 0);
         var up = new Vector3(0, -1, 0); // kinda hacky?
         var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
         var lightPosition = new Vector3(-100, -150, 200);
-        var lightColor = SKColors.Wheat;
-        const float ambientIntensity = 0.5f;
-        const float diffuseIntensity = 0.9f;
+        var lightColor = SKColors.White;
+        const float ambientIntensity = 0.45f;
+        const float diffuseIntensity = 0.6f;
 
         const float fieldOfView = MathF.PI / 6; // 30 degrees
         const float aspectRatio = (float)imageWidth / imageHeight;
@@ -51,7 +51,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
-        var modelColor = SKColors.Gray;
+        var modelColor = SKColors.LightGray;
         if (stlModel.Metadata.Color is { } color)
         {
             modelColor = SKColor.Parse(color);
@@ -193,7 +193,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     private static void DrawGrid(SKCanvas canvas, int width, int height, Matrix4x4 viewMatrix,
         Matrix4x4 projectionMatrix)
     {
-        const int gridSize = 100;
+        const int gridSize = 200;
         const int gridStep = 10;
 
         using var paint = new SKPaint();

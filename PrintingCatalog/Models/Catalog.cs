@@ -1,5 +1,6 @@
 using PrintingCatalog.Interfaces;
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 namespace PrintingCatalog.Models;
@@ -30,7 +31,7 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
     {
         table.ColumnsDefinition(c =>
         {
-            c.ConstantColumn(50);
+            c.ConstantColumn(40);
             c.ConstantColumn(250);
             c.ConstantColumn(100);
             c.RelativeColumn();
@@ -38,7 +39,7 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
 
         table.Header(c =>
         {
-            c.Cell().Border(1).Padding(5).Text("Best. #");
+            c.Cell().Border(1).Padding(5).Text("Nr.");
             c.Cell().Border(1).Padding(5).Text("Vorschau");
             c.Cell().Border(1).Padding(5).Text("Name");
             c.Cell().Border(1).Padding(5).Text("Beschreibung");
@@ -61,7 +62,14 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
             }
 
             table.Cell().Border(1).Padding(5).Text(model.Metadata.Name);
-            table.Cell().Border(1).Padding(5).Text(model.Metadata.Description);
+            table.Cell().Border(1).Padding(5).Column(c =>
+            {
+                c.Spacing(5);
+                c.Item().Text(model.Metadata.Description);
+
+                if (model.Metadata.Color is null)
+                    c.Item().Text("Bitte gewünschte Farbe angeben!").FontColor(Colors.Red.Medium);
+            });
         }
     }
 
@@ -83,14 +91,14 @@ public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer
     {
         table.ColumnsDefinition(c =>
         {
-            c.ConstantColumn(50);
+            c.ConstantColumn(40);
             c.ConstantColumn(200);
             c.RelativeColumn();
         });
 
         table.Header(c =>
         {
-            c.Cell().Border(1).Padding(5).Text("Best. #");
+            c.Cell().Border(1).Padding(5).Text("Nr.");
             c.Cell().Border(1).Padding(5).Text("Name");
             c.Cell().Border(1).Padding(5).Text("Datei");
         });
