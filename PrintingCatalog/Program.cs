@@ -30,4 +30,5 @@ static void ConfigureApp(IConfigurator app)
     app.SetApplicationName("PrintingCatalog");
     app.AddCommand<GenerateCommand>("generate");
     app.AddCommand<RenderCommand>("render");
+    app.AddCommand<PrepareCommand>("prepare");
 }
