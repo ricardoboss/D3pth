@@ -54,7 +54,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
         var projected =
-            ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)
+            CalculateTriangleDepths(TessellateTriangles(ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)))
                 .OrderByDescending(t => t.Depth);
 
         switch (renderMode)
@@ -85,7 +85,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         return surface.Snapshot()!.Encode()!.ToArray()!;
     }
 
-    private static void DrawModelShaded(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+    private static void DrawModelShaded(IOrderedEnumerable<ProjectedTriangleWithDepth> projected, SKCanvas canvas,
         int imageWidth, int imageHeight,
         SKColor modelColor, Vector3 lightPosition, SKColor lightColor, float ambientIntensity, float diffuseIntensity)
     {
@@ -96,7 +96,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
     }
 
-    private static void DrawModelWireframe(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+    private static void DrawModelWireframe(IOrderedEnumerable<ProjectedTriangleWithDepth> projected, SKCanvas canvas,
         int imageWidth, int imageHeight)
     {
         var index = 0;
@@ -106,7 +106,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
     }
 
-    private static void DrawModelDepth(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+    private static void DrawModelDepth(IOrderedEnumerable<ProjectedTriangleWithDepth> projected, SKCanvas canvas,
         int imageWidth, int imageHeight)
     {
         foreach (var (_, a, b, c, depth) in projected)
@@ -170,13 +170,55 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             var projectedB = TransformPoint(modelB, viewMatrix, projectionMatrix);
             var projectedC = TransformPoint(modelC, viewMatrix, projectionMatrix);
 
-            var minDepth = Math.Min(projectedA.Z, Math.Min(projectedB.Z, projectedC.Z));
-            var maxDepth = Math.Max(projectedA.Z, Math.Max(projectedB.Z, projectedC.Z));
+            yield return new ProjectedTriangle(normal, projectedA, projectedB, projectedC);
+        }
+    }
+
+    private static IEnumerable<ProjectedTriangle> TessellateTriangles(IEnumerable<ProjectedTriangle> triangles)
+    {
+        const float maxArea = 0.00001f;
+        foreach (var (normal, a, b, c) in triangles)
+        {
+            var area = MathF.Abs(Vector3.Cross(b - a, c - a).Length()) / 2f;
+            if (area > maxArea)
+            {
+                var splits = SplitTriangle(a, b, c).Select(t => new ProjectedTriangle(normal, t.a, t.b, t.c));
+                var nextLevel = TessellateTriangles(splits);
+                foreach (var triangle in nextLevel)
+                    yield return triangle;
+            }
+            else
+                yield return new ProjectedTriangle(normal, a, b, c);
+        }
+    }
+
+    private static IEnumerable<ProjectedTriangleWithDepth> CalculateTriangleDepths(
+        IEnumerable<ProjectedTriangle> triangles
+    )
+    {
+        foreach (var (normal, a, b, c) in triangles)
+        {
+            var minDepth = Math.Min(a.Z, Math.Min(b.Z, c.Z));
+            var maxDepth = Math.Max(a.Z, Math.Max(b.Z, c.Z));
 
             var depth = minDepth + (maxDepth - minDepth) / 2;
 
-            yield return new(normal, projectedA, projectedB, projectedC, depth);
+            yield return new ProjectedTriangleWithDepth(normal, a, b, c, depth);
         }
+    }
+
+    private static IEnumerable<(Vector3 a, Vector3 b, Vector3 c)> SplitTriangle(Vector3 A, Vector3 B, Vector3 C)
+    {
+        // Step 1: Calculate the midpoints
+        var midAB = (A + B) / 2;
+        var midBC = (B + C) / 2;
+        var midCA = (C + A) / 2;
+
+        // Step 2: Form the smaller triangles
+        yield return (A, midAB, midCA);
+        yield return (B, midBC, midAB);
+        yield return (C, midCA, midBC);
+        yield return (midAB, midBC, midCA);
     }
 
     private static Vector3 CalculateModelBaseTranslation(IEnumerable<Triangle> triangles, Matrix4x4 modelMatrix)
@@ -365,12 +407,12 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     {
         using var paint = new SKPaint();
 
-        const float depthScale = 1000f;
+        const float depthScale = 5000f;
         const float depthOffset = 0.999f;
         var scaledDepth = depthScale * (depth - depthOffset);
-        scaledDepth = MathF.Min(MathF.Max(scaledDepth, 0), 1);
+        // scaledDepth = MathF.Min(MathF.Max(scaledDepth, 0), 1);
 
-        paint.Color = SKColor.FromHsl(scaledDepth * 360f, 255, 128, 255);
+        paint.Color = SKColor.FromHsl((360f * scaledDepth) % 360f, 50, 50);
         paint.Style = SKPaintStyle.Fill;
 
         DrawTriangle(canvas, width, height, a, b, c, paint);
@@ -449,4 +491,5 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     }
 }
 
-internal sealed record ProjectedTriangle(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C, float Depth);
+internal sealed record ProjectedTriangle(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C);
+internal sealed record ProjectedTriangleWithDepth(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C, float Depth);
