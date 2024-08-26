@@ -51,12 +51,6 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
-        var modelColor = SKColors.LightGray;
-        if (stlModel.Metadata.Color is { } color)
-        {
-            modelColor = SKColor.Parse(color);
-        }
-
         DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
         var projected =
@@ -66,6 +60,12 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         switch (renderMode)
         {
             case RenderMode.Shaded:
+                var modelColor = SKColors.LightGray;
+                if (stlModel.Metadata.Color is { } color)
+                {
+                    modelColor = SKColor.Parse(color);
+                }
+
                 DrawModelShaded(projected, canvas, imageWidth, imageHeight, modelColor, lightPosition, lightColor,
                     ambientIntensity, diffuseIntensity);
                 break;
@@ -325,7 +325,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         DrawTriangle(canvas, width, height, a, b, c, paint);
     }
-    
+
     private static void DrawTriangleDebug(SKCanvas canvas,
         int width,
         int height,
@@ -354,7 +354,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         canvas.DrawPath(path, paint);
     }
-    
+
     private static void DrawTriangleDepthDebug(SKCanvas canvas,
         int width,
         int height,
