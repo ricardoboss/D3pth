@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using PrintingCatalog.Interfaces;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -13,6 +14,10 @@ internal sealed class RenderCommand(
     public sealed class Settings : CommandSettings
     {
         [CommandArgument(0, "[file]")] public string? File { get; init; }
+
+        [CommandOption("-m|--mode")]
+        [Description("Render mode (shaded, depth, wireframe)")]
+        public RenderMode Mode { get; init; } = RenderMode.Shaded;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -22,20 +27,20 @@ internal sealed class RenderCommand(
             : new List<FileInfo> { new(settings.File) };
 
         foreach (var file in files)
-            await RenderFile(file);
+            await RenderFile(file, settings.Mode);
 
         return 0;
     }
 
-    private async Task RenderFile(FileInfo file)
+    private async Task RenderFile(FileInfo file, RenderMode mode)
     {
         var model = await stlModelLoader.LoadAsync(file);
 
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = stlModelRenderer.RenderToPng(model);
-        var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, ".png"));
+        var image = stlModelRenderer.RenderToPng(model, mode);
+        var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, $".{mode}.png"));
         await using var stream = imageFile.OpenWrite();
         await stream.WriteAsync(image);
 

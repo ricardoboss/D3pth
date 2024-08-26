@@ -7,7 +7,7 @@ namespace PrintingCatalog.Services;
 
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(IStlModel stlModel)
+    public byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded)
     {
         const int imageWidth = 1024;
         const int imageHeight = 1024;
@@ -63,9 +63,21 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)
                 .OrderByDescending(t => t.Depth);
 
-        DrawModelShaded(projected, canvas, imageWidth, imageHeight, modelColor, lightPosition, lightColor,
-            ambientIntensity, diffuseIntensity);
-        // DrawModelDebug(projected, canvas, imageWidth, imageHeight);
+        switch (renderMode)
+        {
+            case RenderMode.Shaded:
+                DrawModelShaded(projected, canvas, imageWidth, imageHeight, modelColor, lightPosition, lightColor,
+                    ambientIntensity, diffuseIntensity);
+                break;
+            case RenderMode.Depth:
+                DrawModelDepth(projected, canvas, imageWidth, imageHeight);
+                break;
+            case RenderMode.Wireframe:
+                DrawModelWireframe(projected, canvas, imageWidth, imageHeight);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(renderMode), renderMode, "Unknown render mode");
+        }
 
         // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
         // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
@@ -84,13 +96,22 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
     }
 
-    private static void DrawModelDebug(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+    private static void DrawModelWireframe(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
         int imageWidth, int imageHeight)
     {
         var index = 0;
         foreach (var (_, a, b, c, _) in projected)
         {
             DrawTriangleDebug(canvas, imageWidth, imageHeight, index++, a, b, c);
+        }
+    }
+
+    private static void DrawModelDepth(IOrderedEnumerable<ProjectedTriangle> projected, SKCanvas canvas,
+        int imageWidth, int imageHeight)
+    {
+        foreach (var (_, a, b, c, depth) in projected)
+        {
+            DrawTriangleDepthDebug(canvas, imageWidth, imageHeight, depth, a, b, c);
         }
     }
 
@@ -332,6 +353,27 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         paint.IsAntialias = true;
 
         canvas.DrawPath(path, paint);
+    }
+    
+    private static void DrawTriangleDepthDebug(SKCanvas canvas,
+        int width,
+        int height,
+        float depth,
+        Vector3 a,
+        Vector3 b,
+        Vector3 c)
+    {
+        using var paint = new SKPaint();
+
+        const float depthScale = 1000f;
+        const float depthOffset = 0.999f;
+        var scaledDepth = depthScale * (depth - depthOffset);
+        scaledDepth = MathF.Min(MathF.Max(scaledDepth, 0), 1);
+
+        paint.Color = SKColor.FromHsl(scaledDepth * 360f, 255, 128, 255);
+        paint.Style = SKPaintStyle.Fill;
+
+        DrawTriangle(canvas, width, height, a, b, c, paint);
     }
 
     private static void DrawTriangle(
