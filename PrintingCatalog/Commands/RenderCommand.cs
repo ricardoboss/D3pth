@@ -40,7 +40,14 @@ internal sealed class RenderCommand(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
         var image = stlModelRenderer.RenderToPng(model, mode);
-        var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, $".{mode}.png"));
+        var extension = mode switch
+        {
+            RenderMode.Shaded => ".png",
+            RenderMode.Depth => ".Depth.png",
+            RenderMode.Wireframe => ".Wireframe.png",
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null),
+        };
+        var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, extension));
         await using var stream = imageFile.OpenWrite();
         await stream.WriteAsync(image);
 
