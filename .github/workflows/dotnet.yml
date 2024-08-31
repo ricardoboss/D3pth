@@ -35,8 +35,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: ['win-x64', 'linux-x64', 'osx-x64']
-        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
         include:
           - rid: 'win-x64'
             os: 'windows-latest'
