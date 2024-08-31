@@ -4,7 +4,7 @@ using D3pth.Sdk.Models;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace D3pth.Commands;
+namespace D3pth.CLI.Commands;
 
 internal sealed class PrepareCommand(IFileDiscoverer fileDiscoverer) : AsyncCommand<PrepareCommand.Settings>
 {

@@ -6,7 +6,7 @@ using QuestPDF.Previewer;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace D3pth.Commands;
+namespace D3pth.CLI.Commands;
 
 internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncCommand<GenerateCommand.Settings>
 {
