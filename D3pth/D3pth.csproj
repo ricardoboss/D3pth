@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <InvariantGlobalization>true</InvariantGlobalization>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="QuestPDF" />
-      <PackageReference Include="SkiaSharp" />
-      <PackageReference Include="Spectre.Console.Cli" />
-      <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" />
-      <PackageReference Include="System.Linq.Async" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="QuestPDF"/>
+    <PackageReference Include="SkiaSharp"/>
+    <PackageReference Include="Spectre.Console.Cli"/>
+    <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection"/>
+    <PackageReference Include="System.Linq.Async"/>
+  </ItemGroup>
 
 </Project>

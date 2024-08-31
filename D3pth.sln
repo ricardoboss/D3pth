@@ -6,7 +6,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		README.md = README.md
+		global.json = global.json
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F9050467-ABC7-41E0-8C87-1442082C9C1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7C7F4154-8E5D-4909-95BD-AB7339759B48}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Test", "D3pth.Test\D3pth.Test.csproj", "{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +31,13 @@ Global
 		{E42EAE72-2AE3-4FC5-87C1-F4649019FE6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E42EAE72-2AE3-4FC5-87C1-F4649019FE6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E42EAE72-2AE3-4FC5-87C1-F4649019FE6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F9050467-ABC7-41E0-8C87-1442082C9C1A} = {8AC5F47A-CE5A-4FCA-A5AA-74FC0CDE6A48}
+		{7C7F4154-8E5D-4909-95BD-AB7339759B48} = {F9050467-ABC7-41E0-8C87-1442082C9C1A}
 	EndGlobalSection
 EndGlobal
