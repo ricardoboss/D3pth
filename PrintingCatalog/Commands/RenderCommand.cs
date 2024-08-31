@@ -18,6 +18,10 @@ internal sealed class RenderCommand(
         [CommandOption("-m|--mode")]
         [Description("Render mode (shaded, depth, wireframe)")]
         public RenderMode Mode { get; init; } = RenderMode.Shaded;
+
+        [CommandOption("--grid")]
+        [Description("Draw a grid in the background")]
+        public bool DrawGrid { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -26,20 +30,24 @@ internal sealed class RenderCommand(
             ? fileDiscoverer.Discover(Directory.GetCurrentDirectory())
             : new List<FileInfo> { new(settings.File) };
 
+        var options = RenderOptions.None;
+        if (settings.DrawGrid)
+            options |= RenderOptions.DrawGrid;
+
         foreach (var file in files)
-            await RenderFile(file, settings.Mode);
+            await RenderFile(file, settings.Mode, options);
 
         return 0;
     }
 
-    private async Task RenderFile(FileInfo file, RenderMode mode)
+    private async Task RenderFile(FileInfo file, RenderMode mode, RenderOptions options)
     {
         var model = await stlModelLoader.LoadAsync(file);
 
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = stlModelRenderer.RenderToPng(model, mode);
+        var image = stlModelRenderer.RenderToPng(model, mode, options);
         var extension = mode switch
         {
             RenderMode.Shaded => ".png",

@@ -7,7 +7,8 @@ namespace PrintingCatalog.Services;
 
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded)
+    public byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
+        RenderOptions options = RenderOptions.None)
     {
         const int imageWidth = 1024;
         const int imageHeight = 1024;
@@ -51,7 +52,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
-        DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+        if (options.HasFlag(RenderOptions.DrawGrid))
+            DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
         var projected =
             CalculateTriangleDepths(TessellateTriangles(ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)))
@@ -79,7 +81,8 @@ public class SkiaStlModelRenderer : IStlModelRenderer
                 throw new ArgumentOutOfRangeException(nameof(renderMode), renderMode, "Unknown render mode");
         }
 
-        // DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+        if (options.HasFlag(RenderOptions.DrawAxes))
+            DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
         // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
 
         return surface.Snapshot()!.Encode()!.ToArray()!;
