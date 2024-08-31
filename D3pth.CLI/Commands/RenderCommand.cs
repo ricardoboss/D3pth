@@ -1,5 +1,6 @@
 using System.ComponentModel;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Rendering;
+using D3pth.Abstractions.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

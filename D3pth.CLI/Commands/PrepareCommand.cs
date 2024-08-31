@@ -1,5 +1,5 @@
 using System.Text.Json;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Services;
 using D3pth.Sdk.Models;
 using Spectre.Console;
 using Spectre.Console.Cli;

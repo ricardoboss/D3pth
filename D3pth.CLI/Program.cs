@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using D3pth.Commands;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Catalog;
+using D3pth.Abstractions.Rendering;
+using D3pth.Abstractions.Services;
 using D3pth.Catalog.QuestPdf;
 using D3pth.Rendering.Skia;
 using D3pth.Sdk.Services;

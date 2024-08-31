@@ -1,4 +1,4 @@
-namespace D3pth.Abstractions;
+namespace D3pth.Abstractions.Services;
 
 public interface IFileDiscoverer
 {

@@ -1,7 +1,8 @@
 using System.Numerics;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Models;
+using D3pth.Abstractions.Rendering;
 using SkiaSharp;
-using Plane = D3pth.Abstractions.Plane;
+using Plane = D3pth.Abstractions.Models.Plane;
 
 namespace D3pth.Rendering.Skia;
 

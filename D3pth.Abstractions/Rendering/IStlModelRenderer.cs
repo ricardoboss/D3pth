@@ -1,4 +1,6 @@
-namespace D3pth.Abstractions;
+using D3pth.Abstractions.Models;
+
+namespace D3pth.Abstractions.Rendering;
 
 public interface IStlModelRenderer
 {

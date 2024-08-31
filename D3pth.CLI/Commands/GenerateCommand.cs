@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Catalog;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
 using Spectre.Console;

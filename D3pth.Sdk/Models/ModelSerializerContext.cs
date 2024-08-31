@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using D3pth.Abstractions;
+using D3pth.Abstractions.Models;
 
 namespace D3pth.Sdk.Models;
 

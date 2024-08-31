@@ -1,4 +1,6 @@
-using D3pth.Abstractions;
+using D3pth.Abstractions.Catalog;
+using D3pth.Abstractions.Models;
+using D3pth.Abstractions.Rendering;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;

@@ -1,4 +1,4 @@
-using D3pth.Abstractions;
+using D3pth.Abstractions.Services;
 
 namespace D3pth.Sdk.Services;
 

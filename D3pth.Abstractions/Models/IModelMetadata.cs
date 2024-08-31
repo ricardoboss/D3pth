@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace D3pth.Abstractions;
+namespace D3pth.Abstractions.Models;
 
 public interface IModelMetadata
 {
