@@ -43,11 +43,11 @@ jobs:
         with:
           global-json-file: global.json
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -r ${{ matrix.os }}-${{ matrix.arch }}
       - name: Build
-        run: dotnet build --no-restore -c Release
+        run: dotnet build --no-restore -c Release -r ${{ matrix.os }}-${{ matrix.arch }} D3pth.CLI/D3pth.CLI.csproj
       - name: Publish
-        run: dotnet publish --no-build -c Release -r ${{ matrix.os }}-${{ matrix.arch }} -o publish
+        run: dotnet publish --no-build -c Release -r ${{ matrix.os }}-${{ matrix.arch }} -o publish D3pth.CLI/D3pth.CLI.csproj
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
