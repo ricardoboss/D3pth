@@ -1,6 +1,6 @@
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 
-namespace PrintingCatalog.Services;
+namespace D3pth.Services;
 
 public class RecursiveFileDiscoverer : IFileDiscoverer
 {

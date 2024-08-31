@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 
-namespace PrintingCatalog.Models;
+namespace D3pth.Models;
 
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]

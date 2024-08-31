@@ -1,9 +1,9 @@
 using System.Numerics;
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 using SkiaSharp;
-using Plane = PrintingCatalog.Interfaces.Plane;
+using Plane = D3pth.Interfaces.Plane;
 
-namespace PrintingCatalog.Services;
+namespace D3pth.Services;
 
 public class SkiaStlModelRenderer : IStlModelRenderer
 {

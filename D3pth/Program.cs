@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PrintingCatalog.Commands;
-using PrintingCatalog.Interfaces;
-using PrintingCatalog.Services;
+using D3pth.Commands;
+using D3pth.Interfaces;
+using D3pth.Services;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -27,7 +27,7 @@ static void ConfigureServices(IServiceCollection services)
 
 static void ConfigureApp(IConfigurator app)
 {
-    app.SetApplicationName("PrintingCatalog");
+    app.SetApplicationName("D3pth");
     app.AddCommand<GenerateCommand>("generate");
     app.AddCommand<RenderCommand>("render");
     app.AddCommand<PrepareCommand>("prepare");

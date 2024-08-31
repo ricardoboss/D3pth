@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
-using PrintingCatalog.Interfaces;
-using PrintingCatalog.Models;
+using D3pth.Interfaces;
+using D3pth.Models;
 using QuestPDF.Infrastructure;
 using Spectre.Console;
 
-namespace PrintingCatalog.Services;
+namespace D3pth.Services;
 
 internal sealed class QuestPdfCatalogGenerator(
     IFileDiscoverer fileDiscoverer,

@@ -1,6 +1,6 @@
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 
-namespace PrintingCatalog.Models;
+namespace D3pth.Models;
 
 public class ModelMetadata : IModelMetadata
 {

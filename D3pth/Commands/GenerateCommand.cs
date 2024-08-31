@@ -1,12 +1,12 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace PrintingCatalog.Commands;
+namespace D3pth.Commands;
 
 internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncCommand<GenerateCommand.Settings>
 {

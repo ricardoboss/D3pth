@@ -1,10 +1,10 @@
 using System.Text.Json;
-using PrintingCatalog.Interfaces;
-using PrintingCatalog.Models;
+using D3pth.Interfaces;
+using D3pth.Models;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace PrintingCatalog.Commands;
+namespace D3pth.Commands;
 
 internal sealed class PrepareCommand(IFileDiscoverer fileDiscoverer) : AsyncCommand<PrepareCommand.Settings>
 {

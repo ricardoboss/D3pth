@@ -1,4 +1,4 @@
-namespace PrintingCatalog.Interfaces;
+namespace D3pth.Interfaces;
 
 public interface ICatalog
 {

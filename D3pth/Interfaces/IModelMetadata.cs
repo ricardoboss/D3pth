@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace PrintingCatalog.Interfaces;
+namespace D3pth.Interfaces;
 
 public interface IModelMetadata
 {

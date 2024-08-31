@@ -1,9 +1,9 @@
 using System.ComponentModel;
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace PrintingCatalog.Commands;
+namespace D3pth.Commands;
 
 internal sealed class RenderCommand(
     IFileDiscoverer fileDiscoverer,

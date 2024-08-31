@@ -1,9 +1,9 @@
-using PrintingCatalog.Interfaces;
+using D3pth.Interfaces;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace PrintingCatalog.Models;
+namespace D3pth.Models;
 
 public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
     : ICatalog, IDocument

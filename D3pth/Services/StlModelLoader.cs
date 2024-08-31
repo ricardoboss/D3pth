@@ -1,10 +1,10 @@
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.Json;
-using PrintingCatalog.Interfaces;
-using PrintingCatalog.Models;
+using D3pth.Interfaces;
+using D3pth.Models;
 
-namespace PrintingCatalog.Services;
+namespace D3pth.Services;
 
 public class StlModelLoader : IStlModelLoader
 {
