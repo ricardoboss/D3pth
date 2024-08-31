@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using D3pth.Commands;
 using D3pth.Interfaces;
 using D3pth.Services;

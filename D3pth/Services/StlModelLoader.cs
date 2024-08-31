@@ -71,7 +71,7 @@ public class StlModelLoader : IStlModelLoader
         var numberOfTriangles = reader.ReadUInt32();
         if (numberOfTriangles == 0)
             throw new InvalidDataException($"Invalid STL file: number of triangles is zero ({file.FullName})");
-        
+
         if (numberOfTriangles > 20_000_000)
             throw new InvalidDataException($"Invalid STL file: number of triangles is too high (> 20M; {file.FullName})");
 

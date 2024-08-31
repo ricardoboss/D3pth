@@ -17,7 +17,7 @@ internal sealed class PrepareCommand(IFileDiscoverer fileDiscoverer) : AsyncComm
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var files = fileDiscoverer.Discover(settings.Path ?? Directory.GetCurrentDirectory());
-        
+
         foreach (var file in files)
             await PrepareFile(file);
 
