@@ -10,9 +10,10 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+
+    name: Test
 
     steps:
       - uses: actions/checkout@v4
@@ -28,14 +29,18 @@ jobs:
         run: dotnet test --no-build --verbosity normal
 
   publish:
-    needs: build
-    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: test
+
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
         os: ['win', 'linux', 'osx']
         arch: ['x64', 'arm64']
+
     name: Publish for ${{ matrix.os }} ${{ matrix.arch }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
