@@ -54,7 +54,7 @@ jobs:
         with:
           global-json-file: global.json
       - name: Restore dependencies
-        run: dotnet restore -r ${{ matrix.rid }}
+        run: dotnet restore -r ${{ matrix.rid }} D3pth.CLI/D3pth.CLI.csproj
       - name: Build
         run: dotnet build --no-restore -c Release -r ${{ matrix.rid }} D3pth.CLI/D3pth.CLI.csproj
       - name: Publish
