@@ -60,7 +60,7 @@ jobs:
       - name: Publish
         run: dotnet publish --no-build -c Release -r ${{ matrix.rid }} -o publish D3pth.CLI/D3pth.CLI.csproj
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: publish-${{ matrix.rid }}
           path: publish/*
