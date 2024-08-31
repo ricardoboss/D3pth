@@ -37,7 +37,7 @@ public sealed class QuestPdfCatalogGenerator(
             }
             catch (Exception e)
             {
-                logger.LogError($"Error loading '{modelFile.FullName}': {e.Message}");
+                logger.LogError(e, $"Error loading '{modelFile.FullName}': {e.Message}");
             }
 
             if (model is not null)
