@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using D3pth.Abstractions.Models;
 using D3pth.Abstractions.Rendering;
@@ -6,6 +7,7 @@ using Plane = D3pth.Abstractions.Models.Plane;
 
 namespace D3pth.Rendering.Skia;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
     public byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,

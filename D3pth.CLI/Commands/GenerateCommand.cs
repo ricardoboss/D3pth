@@ -1,6 +1,7 @@
-using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using D3pth.Abstractions.Catalog;
+using D3pth.CLI.Settings;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
 using Spectre.Console;
@@ -8,20 +9,10 @@ using Spectre.Console.Cli;
 
 namespace D3pth.CLI.Commands;
 
-internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncCommand<GenerateCommand.Settings>
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncCommand<GenerateSettings>
 {
-    public sealed class Settings : CommandSettings
-    {
-        [CommandOption("-p|--preview")]
-        [Description("Opens the generated catalog in the previewer")]
-        public bool Preview { get; set; } = false;
-
-        [CommandOption("-o|--output")]
-        [Description("The path to the output file")]
-        public string? OutputFile { get; set; }
-    }
-
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, GenerateSettings settings)
     {
         AnsiConsole.MarkupLine("[green]Generating catalog...[/]");
 

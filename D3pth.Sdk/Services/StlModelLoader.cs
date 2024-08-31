@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -7,6 +8,7 @@ using D3pth.Sdk.Models;
 
 namespace D3pth.Sdk.Services;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class StlModelLoader : IStlModelLoader
 {
     public async Task<IStlModel> LoadAsync(FileInfo file, CancellationToken cancellationToken = default)

@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
 using D3pth.Abstractions.Catalog;
 using D3pth.Abstractions.Rendering;
 using D3pth.Abstractions.Services;
 using D3pth.Catalog.QuestPdf;
 using D3pth.CLI.Commands;
+using D3pth.CLI.Settings;
 using D3pth.Rendering.Skia;
 using D3pth.Sdk.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -15,7 +17,7 @@ ConfigureServices(serviceCollection);
 
 using var registrar = new DependencyInjectionRegistrar(serviceCollection);
 
-var commandApp = new CommandApp<GenerateCommand>(registrar);
+var commandApp = new CommandApp(registrar);
 
 commandApp.Configure(ConfigureApp);
 
@@ -29,6 +31,12 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<IStlModelRenderer, SkiaStlModelRenderer>();
 }
 
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(GenerateCommand))]
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(GenerateSettings))]
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(RenderCommand))]
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(RenderSettings))]
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrepareCommand))]
+[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PrepareSettings))]
 static void ConfigureApp(IConfigurator app)
 {
     app.SetApplicationName("D3pth");

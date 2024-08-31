@@ -1,31 +1,20 @@
-using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using D3pth.Abstractions.Rendering;
 using D3pth.Abstractions.Services;
+using D3pth.CLI.Settings;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace D3pth.CLI.Commands;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
 internal sealed class RenderCommand(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,
     IStlModelRenderer stlModelRenderer
-) : AsyncCommand<RenderCommand.Settings>
+) : AsyncCommand<RenderSettings>
 {
-    public sealed class Settings : CommandSettings
-    {
-        [CommandArgument(0, "[file]")] public string? File { get; init; }
-
-        [CommandOption("-m|--mode")]
-        [Description("Render mode (shaded, depth, wireframe)")]
-        public RenderMode Mode { get; init; } = RenderMode.Shaded;
-
-        [CommandOption("--grid")]
-        [Description("Draw a grid in the background")]
-        public bool DrawGrid { get; init; }
-    }
-
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, RenderSettings settings)
     {
         var files = settings.File is null
             ? fileDiscoverer.Discover(Directory.GetCurrentDirectory())

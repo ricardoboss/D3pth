@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using D3pth.Abstractions.Catalog;
 using D3pth.Abstractions.Models;
@@ -8,6 +9,7 @@ using QuestPDF.Infrastructure;
 
 namespace D3pth.Catalog.QuestPdf;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public sealed class QuestPdfCatalogGenerator(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,

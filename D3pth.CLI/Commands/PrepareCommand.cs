@@ -1,22 +1,19 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using D3pth.Abstractions.Services;
+using D3pth.CLI.Settings;
 using D3pth.Sdk.Models;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace D3pth.CLI.Commands;
 
-internal sealed class PrepareCommand(IFileDiscoverer fileDiscoverer) : AsyncCommand<PrepareCommand.Settings>
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+internal sealed class PrepareCommand(IFileDiscoverer fileDiscoverer) : AsyncCommand<PrepareSettings>
 {
-    public sealed class Settings : CommandSettings
+    public override async Task<int> ExecuteAsync(CommandContext context, PrepareSettings prepareSettings)
     {
-        [CommandArgument(0, "[path]")]
-        public string? Path { get; set; }
-    }
-
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        var files = fileDiscoverer.Discover(settings.Path ?? Directory.GetCurrentDirectory());
+        var files = fileDiscoverer.Discover(prepareSettings.Path ?? Directory.GetCurrentDirectory());
 
         foreach (var file in files)
             await PrepareFile(file);
