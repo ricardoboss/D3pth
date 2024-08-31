@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth", "D3pth\D3pth.csproj", "{E42EAE72-2AE3-4FC5-87C1-F4649019FE6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.CLI", "D3pth.CLI\D3pth.CLI.csproj", "{E42EAE72-2AE3-4FC5-87C1-F4649019FE6C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AC5F47A-CE5A-4FCA-A5AA-74FC0CDE6A48}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,6 +21,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Test", "D3pth.Test\D3pth.Test.csproj", "{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Rendering.Skia", "D3pth.Rendering.Skia\D3pth.Rendering.Skia.csproj", "{EE9B8CA3-F669-4124-AAEB-348009056379}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Abstractions", "D3pth.Abstractions\D3pth.Abstractions.csproj", "{89C29418-E6B3-4088-A568-DB3EC0D9F025}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Catalog.QuestPdf", "D3pth.Catalog.QuestPdf\D3pth.Catalog.QuestPdf.csproj", "{DA17F666-F742-491F-9EE0-5B1BDC4207ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Sdk", "D3pth.Sdk\D3pth.Sdk.csproj", "{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +43,22 @@ Global
 		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{107B2FB1-F7D3-4656-9BB0-084A4E646DD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE9B8CA3-F669-4124-AAEB-348009056379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE9B8CA3-F669-4124-AAEB-348009056379}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE9B8CA3-F669-4124-AAEB-348009056379}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE9B8CA3-F669-4124-AAEB-348009056379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89C29418-E6B3-4088-A568-DB3EC0D9F025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89C29418-E6B3-4088-A568-DB3EC0D9F025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89C29418-E6B3-4088-A568-DB3EC0D9F025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89C29418-E6B3-4088-A568-DB3EC0D9F025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA17F666-F742-491F-9EE0-5B1BDC4207ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA17F666-F742-491F-9EE0-5B1BDC4207ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA17F666-F742-491F-9EE0-5B1BDC4207ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA17F666-F742-491F-9EE0-5B1BDC4207ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F9050467-ABC7-41E0-8C87-1442082C9C1A} = {8AC5F47A-CE5A-4FCA-A5AA-74FC0CDE6A48}

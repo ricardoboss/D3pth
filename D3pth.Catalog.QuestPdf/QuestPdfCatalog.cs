@@ -1,11 +1,11 @@
-using D3pth.Interfaces;
+using D3pth.Abstractions;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace D3pth.Models;
+namespace D3pth.Catalog.QuestPdf;
 
-public class Catalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
+internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
     : ICatalog, IDocument
 {
     byte[] ICatalog.GeneratePdf() => this.GeneratePdf();

@@ -1,6 +1,6 @@
-using D3pth.Interfaces;
+using D3pth.Abstractions;
 
-namespace D3pth.Services;
+namespace D3pth.Sdk.Services;
 
 public class RecursiveFileDiscoverer : IFileDiscoverer
 {

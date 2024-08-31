@@ -1,10 +1,10 @@
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.Json;
-using D3pth.Interfaces;
-using D3pth.Models;
+using D3pth.Abstractions;
+using D3pth.Sdk.Models;
 
-namespace D3pth.Services;
+namespace D3pth.Sdk.Services;
 
 public class StlModelLoader : IStlModelLoader
 {

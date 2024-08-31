@@ -1,6 +1,6 @@
-using D3pth.Interfaces;
+using D3pth.Abstractions;
 
-namespace D3pth.Models;
+namespace D3pth.Sdk.Models;
 
 public class ModelMetadata : IModelMetadata
 {

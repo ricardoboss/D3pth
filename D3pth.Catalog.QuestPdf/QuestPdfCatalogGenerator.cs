@@ -1,15 +1,15 @@
 using System.Runtime.CompilerServices;
-using D3pth.Interfaces;
-using D3pth.Models;
+using D3pth.Abstractions;
+using Microsoft.Extensions.Logging;
 using QuestPDF.Infrastructure;
-using Spectre.Console;
 
-namespace D3pth.Services;
+namespace D3pth.Catalog.QuestPdf;
 
-internal sealed class QuestPdfCatalogGenerator(
+public sealed class QuestPdfCatalogGenerator(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,
-    IStlModelRenderer stlModelRenderer
+    IStlModelRenderer stlModelRenderer,
+    ILogger<QuestPdfCatalogGenerator> logger
 ) : ICatalogGenerator
 {
     public async Task<ICatalog> GenerateAsync(string sourceFolder, CancellationToken cancellationToken = default)
@@ -19,7 +19,7 @@ internal sealed class QuestPdfCatalogGenerator(
         var models = await LoadModelsAsync(sourceFolder, cancellationToken).ToListAsync(cancellationToken);
         var sourceDir = new DirectoryInfo(sourceFolder);
 
-        return new Catalog(models, stlModelRenderer, sourceDir);
+        return new QuestPdfCatalog(models, stlModelRenderer, sourceDir);
     }
 
     private async IAsyncEnumerable<IStlModel> LoadModelsAsync(string sourceFolder,
@@ -34,7 +34,7 @@ internal sealed class QuestPdfCatalogGenerator(
             }
             catch (Exception e)
             {
-                AnsiConsole.MarkupLine($"[red]Error loading '[bold]{modelFile.FullName}[/]': {e.Message}[/]");
+                logger.LogError($"Error loading '{modelFile.FullName}': {e.Message}");
             }
 
             if (model is not null)

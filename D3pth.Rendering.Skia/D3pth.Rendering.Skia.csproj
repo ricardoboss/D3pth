@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\D3pth.Abstractions\D3pth.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

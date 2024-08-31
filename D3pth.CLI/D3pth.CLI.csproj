@@ -6,11 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="QuestPDF"/>
-    <PackageReference Include="SkiaSharp"/>
     <PackageReference Include="Spectre.Console.Cli"/>
     <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection"/>
     <PackageReference Include="System.Linq.Async"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D3pth.Abstractions\D3pth.Abstractions.csproj" />
+    <ProjectReference Include="..\D3pth.Catalog.QuestPdf\D3pth.Catalog.QuestPdf.csproj" />
+    <ProjectReference Include="..\D3pth.Rendering.Skia\D3pth.Rendering.Skia.csproj" />
+    <ProjectReference Include="..\D3pth.Sdk\D3pth.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="QuestPDF"/>
+    <PackageReference Include="System.Linq.Async" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\D3pth.Abstractions\D3pth.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

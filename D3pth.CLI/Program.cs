@@ -1,7 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using D3pth.Commands;
-using D3pth.Interfaces;
-using D3pth.Services;
+using D3pth.Abstractions;
+using D3pth.Catalog.QuestPdf;
+using D3pth.Rendering.Skia;
+using D3pth.Sdk.Services;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
