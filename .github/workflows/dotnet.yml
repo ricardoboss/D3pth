@@ -32,15 +32,22 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: test
 
-    runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        os: ['win', 'linux', 'osx']
-        arch: ['x64', 'arm64']
+        rid: ['win-x64', 'linux-x64', 'osx-x64']
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+        include:
+          - rid: 'win-x64'
+            os: 'windows-latest'
+          - rid: 'linux-x64'
+            os: 'ubuntu-latest'
+          - rid: 'osx-x64'
+            os: 'macos-latest'
 
-    name: Publish for ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+
+    name: Publish for ${{ matrix.rid }}
 
     steps:
       - uses: actions/checkout@v4
@@ -49,13 +56,13 @@ jobs:
         with:
           global-json-file: global.json
       - name: Restore dependencies
-        run: dotnet restore -r ${{ matrix.os }}-${{ matrix.arch }}
+        run: dotnet restore -r ${{ matrix.rid }}
       - name: Build
-        run: dotnet build --no-restore -c Release -r ${{ matrix.os }}-${{ matrix.arch }} D3pth.CLI/D3pth.CLI.csproj
+        run: dotnet build --no-restore -c Release -r ${{ matrix.rid }} D3pth.CLI/D3pth.CLI.csproj
       - name: Publish
-        run: dotnet publish --no-build -c Release -r ${{ matrix.os }}-${{ matrix.arch }} -o publish D3pth.CLI/D3pth.CLI.csproj
+        run: dotnet publish --no-build -c Release -r ${{ matrix.rid }} -o publish D3pth.CLI/D3pth.CLI.csproj
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: publish-${{ matrix.os }}-${{ matrix.arch }}
+          name: publish-${{ matrix.rid }}
           path: publish/*
