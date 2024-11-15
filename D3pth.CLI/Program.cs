@@ -8,6 +8,7 @@ using D3pth.CLI.Settings;
 using D3pth.Rendering.Skia;
 using D3pth.Sdk.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
@@ -25,6 +26,12 @@ return await commandApp.RunAsync(args);
 
 static void ConfigureServices(IServiceCollection services)
 {
+    services.AddLogging(b =>
+    {
+        b.ClearProviders();
+        b.AddSpectreConsole();
+    });
+
     services.AddSingleton<ICatalogGenerator, QuestPdfCatalogGenerator>();
     services.AddSingleton<IFileDiscoverer, RecursiveFileDiscoverer>();
     services.AddSingleton<IStlModelLoader, StlModelLoader>();
