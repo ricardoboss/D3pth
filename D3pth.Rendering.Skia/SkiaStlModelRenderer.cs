@@ -497,5 +497,27 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     }
 }
 
-internal sealed record ProjectedTriangle(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C);
-internal sealed record ProjectedTriangleWithDepth(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C, float Depth);
+internal sealed class ProjectedTriangle(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C)
+{
+    public void Deconstruct(out Vector3 normal, out Vector3 a, out Vector3 b, out Vector3 c)
+    {
+        normal = Normal;
+        a = A;
+        b = B;
+        c = C;
+    }
+}
+
+internal sealed class ProjectedTriangleWithDepth(Vector3 Normal, Vector3 A, Vector3 B, Vector3 C, float Depth)
+{
+    public float Depth { get; } = Depth;
+
+    public void Deconstruct(out Vector3 normal, out Vector3 a, out Vector3 b, out Vector3 c, out float depth)
+    {
+        normal = Normal;
+        a = A;
+        b = B;
+        c = C;
+        depth = Depth;
+    }
+}
