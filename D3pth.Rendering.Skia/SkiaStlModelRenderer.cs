@@ -10,12 +10,9 @@ namespace D3pth.Rendering.Skia;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
+    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
         RenderOptions options = RenderOptions.None)
     {
-        const int imageWidth = 1024;
-        const int imageHeight = 1024;
-
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
 
         using var canvas = surface!.Canvas;
@@ -32,9 +29,9 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float diffuseIntensity = 0.6f;
 
         const float fieldOfView = MathF.PI / 6; // 30 degrees
-        const float aspectRatio = (float)imageWidth / imageHeight;
         const float nearPlane = 0.1f;
         const float farPlane = 1000f;
+        var aspectRatio = (float)imageWidth / imageHeight;
 
         var zoom = stlModel.Metadata.Zoom ?? 1;
         var actualFieldOfView = fieldOfView / zoom;

@@ -25,19 +25,19 @@ internal sealed class RenderCommand(
             options |= RenderOptions.DrawGrid;
 
         foreach (var file in files)
-            await RenderFile(file, settings.Mode, options);
+            await RenderFile(file, settings.Mode, options, settings.RenderSize);
 
         return 0;
     }
 
-    private async Task RenderFile(FileInfo file, RenderMode mode, RenderOptions options)
+    private async Task RenderFile(FileInfo file, RenderMode mode, RenderOptions options, int size)
     {
         var model = await stlModelLoader.LoadAsync(file);
 
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = stlModelRenderer.RenderToPng(model, mode, options);
+        var image = stlModelRenderer.RenderToPng(size, size, model, mode, options);
         var extension = mode switch
         {
             RenderMode.Shaded => ".png",

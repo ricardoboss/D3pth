@@ -17,4 +17,7 @@ internal class RenderSettings : CommandSettings
     [CommandOption("--grid")]
     [Description("Draw a grid in the background")]
     public bool DrawGrid { get; init; }
+
+    [CommandOption("--size")]
+    public int RenderSize { get; init; } = 1024;
 }

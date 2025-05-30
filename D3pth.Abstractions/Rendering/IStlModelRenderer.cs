@@ -4,7 +4,7 @@ namespace D3pth.Abstractions.Rendering;
 
 public interface IStlModelRenderer
 {
-    byte[] RenderToPng(IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
+    byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
         RenderOptions options = RenderOptions.None);
 }
 
@@ -19,6 +19,6 @@ public enum RenderMode
 public enum RenderOptions
 {
     None = 0,
-    DrawGrid = 1,
-    DrawAxes = 2,
+    DrawGrid = 1 << 0,
+    DrawAxes = 1 << 1,
 }

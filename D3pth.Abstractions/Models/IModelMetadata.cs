@@ -12,7 +12,7 @@ public interface IModelMetadata
 
     Plane? BasePlane { get; }
 
-    float? Rotation { get; }
+    float? Rotation { get; set; }
 
     float? Zoom { get; }
 }

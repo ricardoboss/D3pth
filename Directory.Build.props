@@ -9,4 +9,11 @@
 
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(OutputType)' == 'Exe' ">
+    <None Remove="$(MSBuildThisFileDirectory)/Models/*" />
+    <Content Include="$(MSBuildThisFileDirectory)/Models/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

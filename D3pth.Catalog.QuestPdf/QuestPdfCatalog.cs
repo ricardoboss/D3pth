@@ -54,7 +54,7 @@ internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModel
             var imageCell = table.Cell().Border(1).Padding(5);
             try
             {
-                var image = renderer.RenderToPng(model);
+                var image = renderer.RenderToPng(1024, 1024, model);
 
                 imageCell.Image(image);
             }

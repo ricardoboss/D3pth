@@ -12,7 +12,7 @@ public class ModelMetadata : IModelMetadata
 
     public Plane? BasePlane { get; init; }
 
-    public float? Rotation { get; init; }
+    public float? Rotation { get; set; }
 
     public float? Zoom { get; init; }
 }

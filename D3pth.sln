@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Catalog.QuestPdf", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Sdk", "D3pth.Sdk\D3pth.Sdk.csproj", "{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.GUI", "D3pth.GUI\D3pth.GUI.csproj", "{BE53D329-A808-4C99-A191-A0F656AFC093}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E735C19-8597-4EEB-A1D8-DAA5AC0DBD82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE53D329-A808-4C99-A191-A0F656AFC093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE53D329-A808-4C99-A191-A0F656AFC093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE53D329-A808-4C99-A191-A0F656AFC093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE53D329-A808-4C99-A191-A0F656AFC093}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F9050467-ABC7-41E0-8C87-1442082C9C1A} = {8AC5F47A-CE5A-4FCA-A5AA-74FC0CDE6A48}

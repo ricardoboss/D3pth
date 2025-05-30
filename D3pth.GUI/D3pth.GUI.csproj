@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Raylib-cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D3pth.Abstractions\D3pth.Abstractions.csproj" />
+    <ProjectReference Include="..\D3pth.Rendering.Skia\D3pth.Rendering.Skia.csproj" />
+    <ProjectReference Include="..\D3pth.Sdk\D3pth.Sdk.csproj" />
+  </ItemGroup>
+
+</Project>
