@@ -7,7 +7,7 @@ using QuestPDF.Infrastructure;
 
 namespace D3pth.Catalog.QuestPdf;
 
-internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
+internal sealed class QuestPdfCatalog(CatalogModelCollection models, IStlModelRenderer renderer, DirectoryInfo baseDirectory)
     : ICatalog, IDocument
 {
     byte[] ICatalog.GeneratePdf() => this.GeneratePdf();
@@ -47,14 +47,14 @@ internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModel
             c.Cell().Border(1).Padding(5).Text("Beschreibung");
         });
 
-        foreach (var model in models.DistinctBy(m => m.Md5Hash).OrderBy(m => m.Metadata.Name))
+        foreach (var (model, metadata) in models.OrderBy(m => m.Metadata.Name))
         {
             table.Cell().Border(1).Padding(5).Text(model.Md5Hash[..4]);
 
             var imageCell = table.Cell().Border(1).Padding(5);
             try
             {
-                var image = renderer.RenderToPng(1024, 1024, model);
+                var image = renderer.RenderToPng(1024, 1024, model, metadata);
 
                 imageCell.Image(image);
             }
@@ -63,13 +63,13 @@ internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModel
                 imageCell.AspectRatio(1).Text($"Error: {e.Message}");
             }
 
-            table.Cell().Border(1).Padding(5).Text(model.Metadata.Name);
+            table.Cell().Border(1).Padding(5).Text(metadata.Name);
             table.Cell().Border(1).Padding(5).Column(c =>
             {
                 c.Spacing(5);
-                c.Item().Text(model.Metadata.Description);
+                c.Item().Text(metadata.Description);
 
-                if (model.Metadata.Color is null)
+                if (metadata.Color is null)
                     c.Item().Text("Bitte gewünschte Farbe angeben!").FontColor(Colors.Red.Medium);
             });
         }
@@ -105,12 +105,12 @@ internal sealed class QuestPdfCatalog(IReadOnlyList<IStlModel> models, IStlModel
             c.Cell().Border(1).Padding(5).Text("Datei");
         });
 
-        foreach (var model in models.DistinctBy(m => m.Md5Hash).OrderBy(m => m.Md5Hash))
+        foreach (var (model, metadata) in models.OrderBy(e => e.Model.Md5Hash))
         {
             var relativePath = Path.GetRelativePath(baseDirectory.FullName, model.File.FullName);
 
             table.Cell().Padding(5).Text(model.Md5Hash[..4]);
-            table.Cell().Padding(5).Text(model.Metadata.Name);
+            table.Cell().Padding(5).Text(metadata.Name);
             table.Cell().Padding(5).Text(relativePath).FontSize(10);
         }
     }

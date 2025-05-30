@@ -11,6 +11,7 @@ namespace D3pth.CLI.Commands;
 internal sealed class RenderCommand(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,
+    IModelMetadataLoader metadataLoader,
     IStlModelRenderer stlModelRenderer
 ) : AsyncCommand<RenderSettings>
 {
@@ -33,11 +34,12 @@ internal sealed class RenderCommand(
     private async Task RenderFile(FileInfo file, RenderMode mode, RenderOptions options, int size)
     {
         var model = await stlModelLoader.LoadAsync(file);
+        var metadata = await metadataLoader.LoadAsync(file);
 
         AnsiConsole.MarkupLine(
-            $"[green]Loaded '[bold]{model.Metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
+            $"[green]Loaded '[bold]{metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = stlModelRenderer.RenderToPng(size, size, model, mode, options);
+        var image = stlModelRenderer.RenderToPng(size, size, model, metadata, mode, options);
         var extension = mode switch
         {
             RenderMode.Shaded => ".png",

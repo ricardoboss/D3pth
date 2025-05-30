@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using D3pth.Abstractions.Catalog;
+using D3pth.Abstractions.Services;
 using D3pth.CLI.Settings;
 using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
@@ -10,14 +11,16 @@ using Spectre.Console.Cli;
 namespace D3pth.CLI.Commands;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-internal sealed class GenerateCommand(ICatalogGenerator generator) : AsyncCommand<GenerateSettings>
+internal sealed class GenerateCommand(IModelCollectionProvider modelCollectionProvider, ICatalogGenerator generator)
+    : AsyncCommand<GenerateSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context, GenerateSettings settings)
     {
         AnsiConsole.MarkupLine("[green]Generating catalog...[/]");
 
         var stopwatch = Stopwatch.StartNew();
-        var catalog = await generator.GenerateAsync(Directory.GetCurrentDirectory());
+        var models = await modelCollectionProvider.LoadAsync(Directory.GetCurrentDirectory());
+        var catalog = generator.Generate(Directory.GetCurrentDirectory(), models);
         stopwatch.Stop();
 
         AnsiConsole.MarkupLine($"[green]Generated catalog in [bold]{stopwatch.Elapsed}[/][/]");

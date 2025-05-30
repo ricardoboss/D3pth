@@ -4,7 +4,7 @@ namespace D3pth.Abstractions.Rendering;
 
 public interface IStlModelRenderer
 {
-    byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
+    byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, RenderMode renderMode = RenderMode.Shaded,
         RenderOptions options = RenderOptions.None);
 }
 

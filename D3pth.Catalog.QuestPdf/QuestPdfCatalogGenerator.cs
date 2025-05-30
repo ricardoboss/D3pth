@@ -1,49 +1,21 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using D3pth.Abstractions.Catalog;
 using D3pth.Abstractions.Models;
 using D3pth.Abstractions.Rendering;
-using D3pth.Abstractions.Services;
-using Microsoft.Extensions.Logging;
+using QuestPDF;
 using QuestPDF.Infrastructure;
 
 namespace D3pth.Catalog.QuestPdf;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public sealed class QuestPdfCatalogGenerator(
-    IFileDiscoverer fileDiscoverer,
-    IStlModelLoader stlModelLoader,
-    IStlModelRenderer stlModelRenderer,
-    ILogger<QuestPdfCatalogGenerator> logger
-) : ICatalogGenerator
+public sealed class QuestPdfCatalogGenerator(IStlModelRenderer stlModelRenderer) : ICatalogGenerator
 {
-    public async Task<ICatalog> GenerateAsync(string sourceFolder, CancellationToken cancellationToken = default)
+    public ICatalog Generate(string sourceFolder, CatalogModelCollection modelCollection)
     {
-        QuestPDF.Settings.License = LicenseType.Community;
+        Settings.License = LicenseType.Community;
 
-        var models = await LoadModelsAsync(sourceFolder, cancellationToken).ToListAsync(cancellationToken);
         var sourceDir = new DirectoryInfo(sourceFolder);
 
-        return new QuestPdfCatalog(models, stlModelRenderer, sourceDir);
-    }
-
-    private async IAsyncEnumerable<IStlModel> LoadModelsAsync(string sourceFolder,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        foreach (var modelFile in fileDiscoverer.Discover(sourceFolder))
-        {
-            IStlModel? model = null;
-            try
-            {
-                model = await stlModelLoader.LoadAsync(modelFile, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, $"Error loading '{modelFile.FullName}': {e.Message}");
-            }
-
-            if (model is not null)
-                yield return model;
-        }
+        return new QuestPdfCatalog(modelCollection, stlModelRenderer, sourceDir);
     }
 }

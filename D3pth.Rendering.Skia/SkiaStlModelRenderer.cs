@@ -10,7 +10,7 @@ namespace D3pth.Rendering.Skia;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, RenderMode renderMode = RenderMode.Shaded,
+    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, RenderMode renderMode = RenderMode.Shaded,
         RenderOptions options = RenderOptions.None)
     {
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
@@ -33,7 +33,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float farPlane = 1000f;
         var aspectRatio = (float)imageWidth / imageHeight;
 
-        var zoom = stlModel.Metadata.Zoom ?? 1;
+        var zoom = modelMetadata.Zoom ?? 1;
         var actualFieldOfView = fieldOfView / zoom;
 
         var projectionMatrix =
@@ -48,7 +48,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         var modelBaseTranslation = CalculateModelBaseTranslation(stlModel.Triangles, modelMatrix);
         modelMatrix *= Matrix4x4.CreateTranslation(modelBaseTranslation);
         var modelRotation =
-            CalculateModelRotation(stlModel.Metadata.BasePlane, stlModel.Metadata.Rotation);
+            CalculateModelRotation(modelMetadata.BasePlane, modelMetadata.Rotation);
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
@@ -62,8 +62,9 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         switch (renderMode)
         {
             case RenderMode.Shaded:
+                // TODO: load color data from STL?
                 var modelColor = SKColors.LightGray;
-                if (stlModel.Metadata.Color is { } color)
+                if (modelMetadata.Color is { } color)
                 {
                     modelColor = SKColor.Parse(color);
                 }
