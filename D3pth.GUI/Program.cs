@@ -1,3 +1,4 @@
+using D3pth.Abstractions.Models;
 using D3pth.Abstractions.Rendering;
 using D3pth.Abstractions.Services;
 using D3pth.Rendering.Skia;
@@ -7,6 +8,8 @@ using Raylib_cs;
 const int windowWidth = 800;
 const int windowHeight = 900;
 
+IStlModel? model = null;
+IModelMetadata? metadata = null;
 byte[]? png = null;
 _ = RenderModel(windowWidth, windowHeight, 0);
 
@@ -53,11 +56,18 @@ return;
 
 async Task RenderModel(int imageWidth, int imageHeight, int rotation)
 {
-    IStlModelLoader stlModelLoader = new StlModelLoader();
-    IStlModelRenderer stlModelRenderer = new SkiaStlModelRenderer();
+    if (model == null || metadata == null)
+    {
+        IStlModelLoader stlModelLoader = new StlModelLoader();
+        IModelMetadataLoader modelMetadataLoader = new JsonModelMetadataLoader();
 
-    var info = new FileInfo("Utah_teapot_(solid).stl");
-    var model = await stlModelLoader.LoadAsync(info);
-    model.Metadata.Rotation = rotation % 360 - 180;
-    png = stlModelRenderer.RenderToPng(imageWidth, imageHeight, model);
+        var info = new FileInfo("Utah_teapot_(solid).stl");
+        model = await stlModelLoader.LoadAsync(info);
+        metadata = await modelMetadataLoader.LoadAsync(info);
+    }
+
+    metadata.Rotation = rotation % 360 - 180;
+
+    IStlModelRenderer stlModelRenderer = new SkiaStlModelRenderer();
+    png = stlModelRenderer.RenderToPng(imageWidth, imageHeight, model, metadata);
 }
