@@ -10,9 +10,10 @@ namespace D3pth.Rendering.Skia;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, RenderMode renderMode = RenderMode.Shaded,
-        RenderOptions options = RenderOptions.None)
+    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata,
+        RenderMode renderMode = RenderMode.Shaded, RenderOptions? options = null)
     {
+        options ??= RenderOptions.None;
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
 
         using var canvas = surface!.Canvas;
@@ -52,13 +53,30 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         modelMatrix *= modelRotation;
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
-        if (options.HasFlag(RenderOptions.DrawGrid))
+        if (options.DrawGrid)
             DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
-        var projected =
-            CalculateTriangleDepths(TessellateTriangles(ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix)))
-                .OrderByDescending(t => t.Depth);
+        if (options.DrawAxes)
+            DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
 
+        var projected = ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix);
+        if (options.TesselationLevel > 0)
+            projected = TessellateTriangles(projected, (float)(1d * Math.Pow(10, -1 * options.TesselationLevel)));
+
+        var depthProjected = CalculateTriangleDepths(projected).OrderByDescending(t => t.Depth);
+
+        DrawModel(imageWidth, imageHeight, depthProjected, modelMetadata, renderMode, canvas, lightPosition,
+            lightColor, ambientIntensity, diffuseIntensity);
+
+        // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
+
+        return surface.Snapshot()!.Encode()!.ToArray()!;
+    }
+
+    private static void DrawModel(int imageWidth, int imageHeight,
+        IOrderedEnumerable<ProjectedTriangleWithDepth> projected, IModelMetadata modelMetadata, RenderMode renderMode,
+        SKCanvas canvas, Vector3 lightPosition, SKColor lightColor, float ambientIntensity, float diffuseIntensity)
+    {
         switch (renderMode)
         {
             case RenderMode.Shaded:
@@ -81,12 +99,6 @@ public class SkiaStlModelRenderer : IStlModelRenderer
             default:
                 throw new ArgumentOutOfRangeException(nameof(renderMode), renderMode, "Unknown render mode");
         }
-
-        if (options.HasFlag(RenderOptions.DrawAxes))
-            DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
-        // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
-
-        return surface.Snapshot()!.Encode()!.ToArray()!;
     }
 
     private static void DrawModelShaded(IOrderedEnumerable<ProjectedTriangleWithDepth> projected, SKCanvas canvas,
@@ -178,16 +190,16 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         }
     }
 
-    private static IEnumerable<ProjectedTriangle> TessellateTriangles(IEnumerable<ProjectedTriangle> triangles)
+    private static IEnumerable<ProjectedTriangle> TessellateTriangles(IEnumerable<ProjectedTriangle> triangles,
+        float maxTriangleArea)
     {
-        const float maxArea = 0.00001f;
         foreach (var (normal, a, b, c) in triangles)
         {
             var area = MathF.Abs(Vector3.Cross(b - a, c - a).Length()) / 2f;
-            if (area > maxArea)
+            if (area > maxTriangleArea)
             {
                 var splits = SplitTriangle(a, b, c).Select(t => new ProjectedTriangle(normal, t.a, t.b, t.c));
-                var nextLevel = TessellateTriangles(splits);
+                var nextLevel = TessellateTriangles(splits, maxTriangleArea);
                 foreach (var triangle in nextLevel)
                     yield return triangle;
             }
@@ -197,8 +209,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
     }
 
     private static IEnumerable<ProjectedTriangleWithDepth> CalculateTriangleDepths(
-        IEnumerable<ProjectedTriangle> triangles
-    )
+        IEnumerable<ProjectedTriangle> triangles)
     {
         foreach (var (normal, a, b, c) in triangles)
         {

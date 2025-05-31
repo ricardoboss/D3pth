@@ -23,7 +23,7 @@ internal sealed class RenderCommand(
 
         var options = RenderOptions.None;
         if (settings.DrawGrid)
-            options |= RenderOptions.DrawGrid;
+            options.DrawGrid = true;
 
         foreach (var file in files)
             await RenderFile(file, settings.Mode, options, settings.RenderSize);

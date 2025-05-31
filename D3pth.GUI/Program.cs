@@ -6,61 +6,97 @@ using D3pth.Sdk.Services;
 using Raylib_cs;
 
 const int windowWidth = 800;
-const int windowHeight = 900;
+const int windowHeight = 800;
 
+Task<byte[]>? renderTask = null;
+byte[]? lastRender = null;
 IStlModel? model = null;
 IModelMetadata? metadata = null;
-byte[]? png = null;
-_ = RenderModel(windowWidth, windowHeight, 0);
 
-Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.VSyncHint);
-Raylib.InitWindow(windowWidth, windowHeight, "Hello World");
+IStlModelLoader stlModelLoader = new StlModelLoader();
+IModelMetadataLoader modelMetadataLoader = new JsonModelMetadataLoader();
+IStlModelRenderer stlModelRenderer = new SkiaStlModelRenderer();
 
-Raylib.BeginDrawing();
-Raylib.ClearBackground(Color.White);
-Raylib.EndDrawing();
-
-var drawCount = 0;
-Texture2D? texture = null;
-
-while (!Raylib.WindowShouldClose())
-{
-    Raylib.BeginDrawing();
-    Raylib.ClearBackground(Color.White);
-
-    if (png != null)
-    {
-        if (texture.HasValue)
-            Raylib.UnloadTexture(texture.Value);
-
-        var image = Raylib.LoadImageFromMemory(".png", png);
-        texture = Raylib.LoadTextureFromImage(image);
-        Raylib.UnloadImage(image);
-
-        drawCount++;
-        png = null;
-        _ = RenderModel(Raylib.GetScreenWidth(), Raylib.GetScreenHeight(), drawCount * 3);
-    }
-
-    if (texture.HasValue)
-        Raylib.DrawTexture(texture.Value, 0, 0, Color.White);
-
-    Raylib.DrawText(drawCount.ToString(), 10, 10, 12, Color.Black);
-
-    Raylib.EndDrawing();
-}
-
-Raylib.CloseWindow();
+MainLoop();
 
 return;
 
-async Task RenderModel(int imageWidth, int imageHeight, int rotation)
+void StartRender(int imageWidth, int imageHeight, int rotation)
+{
+    renderTask = Task.Run(() => RenderModel(imageWidth, imageHeight, rotation));
+}
+
+void Update(int imageWidth, int imageHeight, int frameCount)
+{
+    if (renderTask == null)
+    {
+        StartRender(imageWidth, imageHeight, frameCount * 3);
+
+        return;
+    }
+
+    if (renderTask.IsCompleted)
+    {
+        if (renderTask.IsCompletedSuccessfully)
+            lastRender = renderTask.Result;
+
+        StartRender(imageWidth, imageHeight, frameCount * 3);
+    }
+}
+
+void MainLoop()
+{
+    var drawCount = 0;
+    var frameRate = 0;
+
+    Texture2D? texture = null;
+
+    Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
+    Raylib.InitWindow(windowWidth, windowHeight, "D3pth Renderer");
+
+    Raylib.BeginDrawing();
+    Raylib.ClearBackground(Color.White);
+    Raylib.EndDrawing();
+
+    while (!Raylib.WindowShouldClose())
+    {
+        Raylib.BeginDrawing();
+        Raylib.ClearBackground(Color.White);
+
+        if (lastRender != null)
+        {
+            if (texture.HasValue)
+                Raylib.UnloadTexture(texture.Value);
+
+            var image = Raylib.LoadImageFromMemory(".png", lastRender);
+            texture = Raylib.LoadTextureFromImage(image);
+            Raylib.UnloadImage(image);
+
+            lastRender = null;
+
+            drawCount++;
+        }
+
+        Update(Raylib.GetScreenWidth(), Raylib.GetScreenHeight(), drawCount);
+
+        if (texture.HasValue)
+            Raylib.DrawTexture(texture.Value, 0, 0, Color.White);
+
+        frameRate = (int)(frameRate * 0.999f + (1 / Raylib.GetFrameTime()) * 0.001f);
+
+        Raylib.DrawText(drawCount.ToString(), 10, 10, 12, Color.Black);
+        Raylib.DrawText(frameRate.ToString(), 10, 24, 12, Color.Black);
+
+        Raylib.EndDrawing();
+    }
+
+    Raylib.CloseWindow();
+}
+
+async Task<byte[]> RenderModel(int imageWidth, int imageHeight, int rotation)
 {
     if (model == null || metadata == null)
     {
-        IStlModelLoader stlModelLoader = new StlModelLoader();
-        IModelMetadataLoader modelMetadataLoader = new JsonModelMetadataLoader();
-
         var info = new FileInfo("Utah_teapot_(solid).stl");
         model = await stlModelLoader.LoadAsync(info);
         metadata = await modelMetadataLoader.LoadAsync(info);
@@ -68,6 +104,10 @@ async Task RenderModel(int imageWidth, int imageHeight, int rotation)
 
     metadata.Rotation = rotation % 360 - 180;
 
-    IStlModelRenderer stlModelRenderer = new SkiaStlModelRenderer();
-    png = stlModelRenderer.RenderToPng(imageWidth, imageHeight, model, metadata);
+    return stlModelRenderer.RenderToPng(imageWidth, imageHeight, model, metadata, options: new()
+    {
+        DrawGrid = false,
+        DrawAxes = false,
+        TesselationLevel = 0,
+    });
 }
