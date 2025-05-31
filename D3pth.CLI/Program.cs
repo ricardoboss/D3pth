@@ -35,7 +35,8 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<ICatalogGenerator, QuestPdfCatalogGenerator>();
     services.AddSingleton<IFileDiscoverer, RecursiveFileDiscoverer>();
     services.AddSingleton<IStlModelLoader, StlModelLoader>();
-    services.AddSingleton<IStlModelRenderer, SkiaStlModelRenderer>();
+    services.AddSingleton<SkiaStlModelRenderer>();
+    services.AddSingleton<IStlModelPngRenderer, SkiaStlModelPngRenderer>();
 }
 
 [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(GenerateCommand))]

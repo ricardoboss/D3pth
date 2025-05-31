@@ -10,9 +10,12 @@ namespace D3pth.Rendering.Skia;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class SkiaStlModelRenderer : IStlModelRenderer
 {
-    public byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata,
-        RenderMode renderMode = RenderMode.Shaded, RenderOptions? options = null)
+    public void Render<TContext>(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata,
+        TContext context, RenderOptions? options = null) where TContext : IStlModelRenderContext
     {
+        if (context is not SkiaStlModelRenderContext skiaContext)
+            throw new ArgumentException("Invalid context", nameof(context));
+
         options ??= RenderOptions.None;
         var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
 
@@ -65,12 +68,12 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         var depthProjected = CalculateTriangleDepths(projected).OrderByDescending(t => t.Depth);
 
-        DrawModel(imageWidth, imageHeight, depthProjected, modelMetadata, renderMode, canvas, lightPosition,
+        DrawModel(imageWidth, imageHeight, depthProjected, modelMetadata, options.Mode, canvas, lightPosition,
             lightColor, ambientIntensity, diffuseIntensity);
 
         // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
 
-        return surface.Snapshot()!.Encode()!.ToArray()!;
+        skiaContext.Surface = surface;
     }
 
     private static void DrawModel(int imageWidth, int imageHeight,

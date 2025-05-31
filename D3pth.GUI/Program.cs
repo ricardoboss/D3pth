@@ -15,7 +15,7 @@ IModelMetadata? metadata = null;
 
 IStlModelLoader stlModelLoader = new StlModelLoader();
 IModelMetadataLoader modelMetadataLoader = new JsonModelMetadataLoader();
-IStlModelRenderer stlModelRenderer = new SkiaStlModelRenderer();
+IStlModelPngRenderer stlModelRenderer = new SkiaStlModelPngRenderer(new());
 
 MainLoop();
 
@@ -47,7 +47,7 @@ void Update(int imageWidth, int imageHeight, int frameCount)
 void MainLoop()
 {
     var drawCount = 0;
-    var frameRate = 0;
+    var frameRate = 60;
 
     Texture2D? texture = null;
 
@@ -58,6 +58,7 @@ void MainLoop()
     Raylib.ClearBackground(Color.White);
     Raylib.EndDrawing();
 
+    Raylib.SetTargetFPS(60);
     while (!Raylib.WindowShouldClose())
     {
         Raylib.BeginDrawing();
@@ -82,7 +83,7 @@ void MainLoop()
         if (texture.HasValue)
             Raylib.DrawTexture(texture.Value, 0, 0, Color.White);
 
-        frameRate = (int)(frameRate * 0.999f + (1 / Raylib.GetFrameTime()) * 0.001f);
+        frameRate = (int)(frameRate * 0.9f + (1f / Raylib.GetFrameTime()) * 0.1f);
 
         Raylib.DrawText(drawCount.ToString(), 10, 10, 12, Color.Black);
         Raylib.DrawText(frameRate.ToString(), 10, 24, 12, Color.Black);
@@ -104,10 +105,5 @@ async Task<byte[]> RenderModel(int imageWidth, int imageHeight, int rotation)
 
     metadata.Rotation = rotation % 360 - 180;
 
-    return stlModelRenderer.RenderToPng(imageWidth, imageHeight, model, metadata, options: new()
-    {
-        DrawGrid = false,
-        DrawAxes = false,
-        TesselationLevel = 0,
-    });
+    return stlModelRenderer.Render(imageWidth, imageHeight, model, metadata);
 }

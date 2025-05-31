@@ -4,8 +4,8 @@ namespace D3pth.Abstractions.Rendering;
 
 public interface IStlModelRenderer
 {
-    byte[] RenderToPng(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, RenderMode renderMode = RenderMode.Shaded,
-        RenderOptions? options = null);
+    void Render<TContext>(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, TContext context,
+        RenderOptions? options = null) where TContext : IStlModelRenderContext;
 }
 
 public enum RenderMode
@@ -23,5 +23,7 @@ public class RenderOptions
 
     public bool DrawAxes { get; set; } = false;
 
-    public int TesselationLevel { get; set; } = 0;
+    public int TesselationLevel { get; set; } = 5;
+
+    public RenderMode Mode { get; set; } = RenderMode.Shaded;
 }

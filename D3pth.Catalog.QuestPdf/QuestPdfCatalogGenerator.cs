@@ -8,7 +8,7 @@ using QuestPDF.Infrastructure;
 namespace D3pth.Catalog.QuestPdf;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public sealed class QuestPdfCatalogGenerator(IStlModelRenderer stlModelRenderer) : ICatalogGenerator
+public sealed class QuestPdfCatalogGenerator(IStlModelPngRenderer pngRenderer) : ICatalogGenerator
 {
     public ICatalog Generate(string sourceFolder, CatalogModelCollection modelCollection)
     {
@@ -16,6 +16,6 @@ public sealed class QuestPdfCatalogGenerator(IStlModelRenderer stlModelRenderer)
 
         var sourceDir = new DirectoryInfo(sourceFolder);
 
-        return new QuestPdfCatalog(modelCollection, stlModelRenderer, sourceDir);
+        return new QuestPdfCatalog(modelCollection, pngRenderer, sourceDir);
     }
 }

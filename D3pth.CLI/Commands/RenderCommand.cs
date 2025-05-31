@@ -12,7 +12,7 @@ internal sealed class RenderCommand(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,
     IModelMetadataLoader metadataLoader,
-    IStlModelRenderer stlModelRenderer
+    IStlModelPngRenderer pngRenderer
 ) : AsyncCommand<RenderSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context, RenderSettings settings)
@@ -22,16 +22,17 @@ internal sealed class RenderCommand(
             : new List<FileInfo> { new(settings.File) };
 
         var options = RenderOptions.None;
+        options.Mode = settings.Mode;
         if (settings.DrawGrid)
             options.DrawGrid = true;
 
         foreach (var file in files)
-            await RenderFile(file, settings.Mode, options, settings.RenderSize);
+            await RenderFile(file, options, settings.RenderSize);
 
         return 0;
     }
 
-    private async Task RenderFile(FileInfo file, RenderMode mode, RenderOptions options, int size)
+    private async Task RenderFile(FileInfo file, RenderOptions options, int size)
     {
         var model = await stlModelLoader.LoadAsync(file);
         var metadata = await metadataLoader.LoadAsync(file);
@@ -39,13 +40,13 @@ internal sealed class RenderCommand(
         AnsiConsole.MarkupLine(
             $"[green]Loaded '[bold]{metadata.Name}[/]' with [bold]{model.Triangles.Length}[/] triangles[/]");
 
-        var image = stlModelRenderer.RenderToPng(size, size, model, metadata, mode, options);
-        var extension = mode switch
+        var image = pngRenderer.Render(size, size, model, metadata, options);
+        var extension = options.Mode switch
         {
             RenderMode.Shaded => ".png",
             RenderMode.Depth => ".Depth.png",
             RenderMode.Wireframe => ".Wireframe.png",
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(options.Mode), options.Mode, null),
         };
         var imageFile = new FileInfo(Path.ChangeExtension(file.FullName, extension));
         await using var stream = imageFile.OpenWrite();

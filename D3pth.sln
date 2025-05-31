@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Sdk", "D3pth.Sdk\D3pt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.GUI", "D3pth.GUI\D3pth.GUI.csproj", "{BE53D329-A808-4C99-A191-A0F656AFC093}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3pth.Rendering.Raylib", "D3pth.Rendering.Raylib\D3pth.Rendering.Raylib.csproj", "{8B4C2EEF-E4D2-43C9-97D1-279CE144CAE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{BE53D329-A808-4C99-A191-A0F656AFC093}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE53D329-A808-4C99-A191-A0F656AFC093}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE53D329-A808-4C99-A191-A0F656AFC093}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B4C2EEF-E4D2-43C9-97D1-279CE144CAE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B4C2EEF-E4D2-43C9-97D1-279CE144CAE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B4C2EEF-E4D2-43C9-97D1-279CE144CAE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B4C2EEF-E4D2-43C9-97D1-279CE144CAE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F9050467-ABC7-41E0-8C87-1442082C9C1A} = {8AC5F47A-CE5A-4FCA-A5AA-74FC0CDE6A48}
