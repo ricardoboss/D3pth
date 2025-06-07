@@ -8,16 +8,16 @@ using Plane = D3pth.Abstractions.Models.Plane;
 namespace D3pth.Rendering.Skia;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-public class SkiaStlModelRenderer : IStlModelRenderer
+public class SkiaModelRenderer : IModelRenderer
 {
-    public void Render<TContext>(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata,
-        TContext context, RenderOptions? options = null) where TContext : IStlModelRenderContext
+    public void Render<TContext>(TContext context, IStlModel stlModel, IModelMetadata modelMetadata,
+        RenderOptions? options = null) where TContext : IModelRenderContext
     {
-        if (context is not SkiaStlModelRenderContext skiaContext)
+        if (context is not SkiaModelRenderContext skiaContext)
             throw new ArgumentException("Invalid context", nameof(context));
 
         options ??= RenderOptions.None;
-        var surface = SKSurface.Create(new SKImageInfo(imageWidth, imageHeight));
+        var surface = SKSurface.Create(new SKImageInfo(context.CanvasWidth, context.CanvasHeight));
 
         using var canvas = surface!.Canvas;
         canvas!.Clear(SKColors.Transparent);
@@ -35,7 +35,7 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         const float fieldOfView = MathF.PI / 6; // 30 degrees
         const float nearPlane = 0.1f;
         const float farPlane = 1000f;
-        var aspectRatio = (float)imageWidth / imageHeight;
+        var aspectRatio = context.CanvasWidth / (float)context.CanvasHeight;
 
         var zoom = modelMetadata.Zoom ?? 1;
         var actualFieldOfView = fieldOfView / zoom;
@@ -57,10 +57,10 @@ public class SkiaStlModelRenderer : IStlModelRenderer
         modelMatrix *= Matrix4x4.CreateScale(2f);
 
         if (options.DrawGrid)
-            DrawGrid(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+            DrawGrid(canvas, context.CanvasWidth, context.CanvasHeight, viewMatrix, projectionMatrix);
 
         if (options.DrawAxes)
-            DrawAxes(canvas, imageWidth, imageHeight, viewMatrix, projectionMatrix);
+            DrawAxes(canvas, context.CanvasWidth, context.CanvasHeight, viewMatrix, projectionMatrix);
 
         var projected = ProjectTriangles(stlModel.Triangles, modelMatrix, viewMatrix, projectionMatrix);
         if (options.TesselationLevel > 0)
@@ -68,10 +68,11 @@ public class SkiaStlModelRenderer : IStlModelRenderer
 
         var depthProjected = CalculateTriangleDepths(projected).OrderByDescending(t => t.Depth);
 
-        DrawModel(imageWidth, imageHeight, depthProjected, modelMetadata, options.Mode, canvas, lightPosition,
+        DrawModel(context.CanvasWidth, context.CanvasHeight, depthProjected, modelMetadata, options.Mode, canvas,
+            lightPosition,
             lightColor, ambientIntensity, diffuseIntensity);
 
-        // DrawSun(canvas, imageWidth, imageHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
+        // DrawSun(canvas, context.CanvasWidth, context.CanvasHeight, lightPosition, lightColor, viewMatrix, projectionMatrix);
 
         skiaContext.Surface = surface;
     }

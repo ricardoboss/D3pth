@@ -7,7 +7,7 @@ using QuestPDF.Infrastructure;
 
 namespace D3pth.Catalog.QuestPdf;
 
-internal sealed class QuestPdfCatalog(CatalogModelCollection models, IStlModelPngRenderer renderer, DirectoryInfo baseDirectory)
+internal sealed class QuestPdfCatalog(CatalogModelCollection models, IPngRenderer renderer, DirectoryInfo baseDirectory)
     : ICatalog, IDocument
 {
     byte[] ICatalog.GeneratePdf() => this.GeneratePdf();

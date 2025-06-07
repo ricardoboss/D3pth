@@ -2,10 +2,10 @@ using D3pth.Abstractions.Models;
 
 namespace D3pth.Abstractions.Rendering;
 
-public interface IStlModelRenderer
+public interface IModelRenderer
 {
-    void Render<TContext>(int imageWidth, int imageHeight, IStlModel stlModel, IModelMetadata modelMetadata, TContext context,
-        RenderOptions? options = null) where TContext : IStlModelRenderContext;
+    void Render<TContext>(TContext context, IStlModel stlModel, IModelMetadata modelMetadata,
+        RenderOptions? options = null) where TContext : IModelRenderContext;
 }
 
 public enum RenderMode

@@ -15,7 +15,7 @@ IModelMetadata? metadata = null;
 
 IStlModelLoader stlModelLoader = new StlModelLoader();
 IModelMetadataLoader modelMetadataLoader = new JsonModelMetadataLoader();
-IStlModelPngRenderer stlModelRenderer = new SkiaStlModelPngRenderer(new());
+IPngRenderer renderer = new SkiaPngRenderer(new());
 
 MainLoop();
 
@@ -105,5 +105,5 @@ async Task<byte[]> RenderModel(int imageWidth, int imageHeight, int rotation)
 
     metadata.Rotation = rotation % 360 - 180;
 
-    return stlModelRenderer.Render(imageWidth, imageHeight, model, metadata);
+    return renderer.Render(imageWidth, imageHeight, model, metadata);
 }

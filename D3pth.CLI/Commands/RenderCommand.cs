@@ -12,7 +12,7 @@ internal sealed class RenderCommand(
     IFileDiscoverer fileDiscoverer,
     IStlModelLoader stlModelLoader,
     IModelMetadataLoader metadataLoader,
-    IStlModelPngRenderer pngRenderer
+    IPngRenderer pngRenderer
 ) : AsyncCommand<RenderSettings>
 {
     public override async Task<int> ExecuteAsync(CommandContext context, RenderSettings settings)
